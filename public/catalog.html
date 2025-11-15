@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zuppardo's Product Catalog</title>
+  <style>
+    :root {
+      --brand: #b11226;
+      --ink: #0a0a0a;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --bg: #f7f7f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #fff; border-bottom: 2px solid var(--brand); position: sticky; top: 0; z-index: 10; }
+    .toolbar .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+    .toolbar img { height: 36px; }
+    .toolbar button { border: 1px solid var(--border); background: #fff; border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; }
+    .card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    h2, h3 { margin-top: 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 8px; border-bottom: 1px solid var(--border); text-align: left; }
+    th { background: #f3f4f6; font-weight: 600; }
+    button.primary { background: var(--brand); color: #fff; border: none; }
+    button.danger { background: #fee2e2; color: #b11226; border: none; }
+    label { display: block; font-weight: 600; margin-top: 12px; font-size: 14px; }
+    input, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; }
+    textarea { min-height: 80px; resize: vertical; }
+    .muted { color: var(--muted); font-size: 13px; margin-top: 8px; }
+    .table-wrapper { max-height: 420px; overflow-y: auto; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .ai-btn-inline { border: 1px solid var(--border); background: #f9fafb; border-radius: 6px; padding: 4px 8px; font-size: 12px; cursor: pointer; margin-left: 8px; }
+    .ai-modal-backdrop { position: fixed; inset:0; background: rgba(0,0,0,0.45); display:none; align-items:center; justify-content:center; z-index: 1000; padding: 16px; }
+    .ai-modal-backdrop.show { display:flex; }
+    .ai-modal { background:#fff; border-radius:12px; max-width:500px; width:100%; padding:20px; box-shadow:0 20px 60px rgba(0,0,0,0.2); display:flex; flex-direction:column; gap:12px; }
+    .ai-modal textarea { width:100%; min-height:180px; border:1px solid var(--border); border-radius:8px; padding:10px; font-family:inherit; }
+    .ai-modal .actions { display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; }
+    .ai-modal button { padding:8px 14px; border-radius:8px; border:1px solid var(--border); cursor:pointer; }
+    .ai-modal button.primary { background: var(--brand); color:#fff; border:none; }
+    .color-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+    .color-row input[type="color"] { width: 60px; height: 40px; padding: 0; border: none; background: transparent; }
+    .color-chip { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; background: #fff; }
+    .color-chip span { font-weight: 600; }
+    .swatch { width: 32px; height: 32px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); }
+    @media (min-width: 900px) {
+      .wrap { grid-template-columns: 2fr 1fr; }
+      .wrap .card:nth-child(3) { grid-column: 1 / span 2; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <div class="brand">
+      <img src="https://zuppardosrenovations.com/wp-content/uploads/2024/11/64ee5a67dae52024c3e16f6a_ZR-Official-Logo-2-p-500.png" alt="Zuppardo's Renovations" />
+      <span>Catalog Manager</span>
+    </div>
+    <div class="actions">
+      <button onclick="window.location.href='final_quote_builder.html'">Back to Builder</button>
+      <button onclick="window.location.href='sales_management.html'">Sales Dashboard</button>
+    </div>
+  </div>
+  <div class="wrap">
+    <section class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        <h2>Product Library</h2>
+        <button class="primary" id="newProductBtn">New Product</button>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Unit Price</th>
+              <th>Status</th>
+              <th>Owner</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="productRows"></tbody>
+        </table>
+      </div>
+    </section>
+    <section class="card">
+      <h3 id="formTitle">Add Product</h3>
+      <form id="productForm">
+        <label>Name<input id="prodName" required /></label>
+        <label>Description<textarea id="prodDescription"></textarea></label>
+        <label>Unit Price ($/sq)<input id="prodPrice" type="number" min="0" step="1" /></label>
+        <label>Warranty<button type="button" class="ai-btn-inline" data-product-ai="product-warranty">AI Rewrite</button><textarea id="prodWarranty" placeholder="Warranty details"></textarea></label>
+        <label>Scope Bullets (one per line)<button type="button" class="ai-btn-inline" data-product-ai="scope">AI Rewrite</button><textarea id="prodScope" placeholder="Bullet 1\nBullet 2"></textarea></label>
+        <label>Components (one per line)<button type="button" class="ai-btn-inline" data-product-ai="components">AI Rewrite</button><textarea id="prodComponents" placeholder="Component 1\nComponent 2"></textarea></label>
+        <label>Tags (comma separated)<input id="prodTags" placeholder="asphalt, premium" /></label>
+        <div style="display:flex; gap:8px; align-items:center; margin-top:12px; flex-wrap:wrap;">
+          <label style="display:flex; gap:6px; align-items:center; font-weight:500"><input type="checkbox" id="prodApproved" /> Approved</label>
+          <label style="display:flex; gap:6px; align-items:center; font-weight:500"><input type="checkbox" id="prodCustom" /> Custom</label>
+        </div>
+        <div class="actions" style="margin-top:12px;">
+          <button type="submit" class="primary">Save</button>
+          <button type="button" id="deleteProductBtn" class="danger">Delete</button>
+        </div>
+      </form>
+      <div id="productFormStatus" class="muted"></div>
+    </section>
+    <section class="card">
+      <h3>Template Defaults</h3>
+      <label>Default Scope Bullets<textarea id="defaultScope"></textarea></label>
+      <label>Default Disclaimer<button type="button" class="ai-btn-inline" data-product-ai="default-warranty">AI Rewrite</button><textarea id="defaultDisclaimer" rows="4"></textarea></label>
+      <button class="primary" id="saveDefaultsBtn" style="margin-top:12px;">Save Defaults</button>
+      <div id="defaultsStatus" class="muted"></div>
+    </section>
+    <section class="card">
+      <h3>Branding</h3>
+      <label>Company Name<input id="brandName" /></label>
+      <label>Address<textarea id="brandAddress" rows="2"></textarea></label>
+      <label>Phone<input id="brandPhone" /></label>
+      <label>Website<input id="brandWebsite" /></label>
+      <label>Logo URL<input id="brandLogo" /></label>
+      <div class="color-row">
+        <div class="color-chip">
+          <div class="swatch" id="brandPrimarySwatch"></div>
+          <span id="brandPrimaryHex">#b11226</span>
+        </div>
+        <input id="brandPrimary" type="color" />
+      </div>
+      <div class="color-row">
+        <div class="color-chip">
+          <div class="swatch" id="brandSecondarySwatch"></div>
+          <span id="brandSecondaryHex">#0a0a0a</span>
+        </div>
+        <input id="brandSecondary" type="color" />
+      </div>
+      <button class="primary" id="saveBrandingBtn" style="margin-top:12px;">Save Branding</button>
+      <div id="brandingStatus" class="muted"></div>
+    </section>
+  </div>
+  <div class="ai-modal-backdrop" id="productAiModal">
+    <div class="ai-modal">
+      <div>
+        <h3 id="productAiTitle" style="margin:0 0 4px 0;"></h3>
+        <div class="muted" id="productAiContext"></div>
+      </div>
+      <textarea id="productAiTextarea"></textarea>
+      <div class="actions">
+        <button id="productAiGenerate">Generate</button>
+        <button id="productAiApply" class="primary">Apply</button>
+        <button id="productAiCancel">Cancel</button>
+      </div>
+      <div class="muted" id="productAiStatus"></div>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const qs = (sel) => document.querySelector(sel);
+      const productRows = qs('#productRows');
+      const form = qs('#productForm');
+      const statusEl = qs('#productFormStatus');
+      let products = [];
+      let selectedId = null;
+      let productAiState = null;
+
+      const fmtUSD = (value) => Number(value || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+
+      function setFormStatus(message, isError){
+        statusEl.textContent = message || '';
+        statusEl.style.color = isError ? '#b11226' : 'var(--muted)';
+      }
+
+      function setDefaultsStatus(message, isError){
+        const el = qs('#defaultsStatus');
+        el.textContent = message || '';
+        el.style.color = isError ? '#b11226' : 'var(--muted)';
+      }
+
+      function setBrandingStatus(message, isError){
+        const el = qs('#brandingStatus');
+        el.textContent = message || '';
+        el.style.color = isError ? '#b11226' : 'var(--muted)';
+      }
+
+      function updateColorDisplays() {
+        const primary = qs('#brandPrimary').value || '#b11226';
+        const secondary = qs('#brandSecondary').value || '#0a0a0a';
+        qs('#brandPrimaryHex').textContent = primary.toUpperCase();
+        qs('#brandSecondaryHex').textContent = secondary.toUpperCase();
+        qs('#brandPrimarySwatch').style.background = primary;
+        qs('#brandSecondarySwatch').style.background = secondary;
+      }
+
+      async function loadProducts(){
+        try{
+          const res = await fetch('/api/products?includeUnapproved=true');
+          const data = await res.json();
+          products = Array.isArray(data) ? data : [];
+          renderTable();
+        }catch(err){
+          console.error(err);
+        }
+      }
+
+      async function loadDefaults(){
+        try{
+          const res = await fetch('/api/settings/defaults');
+          if(!res.ok) return;
+          const data = await res.json();
+          qs('#defaultScope').value = (data.scopeBullets || []).join('\n');
+          qs('#defaultDisclaimer').value = data.disclaimer || '';
+          if(data.company){
+            qs('#brandName').value = data.company.companyName || data.company.name || '';
+            qs('#brandAddress').value = data.company.address || '';
+            qs('#brandPhone').value = data.company.phone || '';
+            qs('#brandWebsite').value = data.company.website || data.company.url || '';
+          }
+        }catch(err){ console.error(err); }
+      }
+
+      async function loadBranding(){
+        try{
+          const res = await fetch('/api/settings/branding');
+          if(!res.ok) return;
+          const data = await res.json();
+          qs('#brandName').value = data.companyName || '';
+          qs('#brandAddress').value = data.address || '';
+          qs('#brandPhone').value = data.phone || '';
+          qs('#brandWebsite').value = data.website || '';
+          qs('#brandLogo').value = data.logoUrl || '';
+          qs('#brandPrimary').value = data.primaryColor || '#b11226';
+          qs('#brandSecondary').value = data.secondaryColor || '#0a0a0a';
+          updateColorDisplays();
+        }catch(err){
+          console.error(err);
+        }
+      }
+
+      function renderTable(){
+        if(products.length === 0){
+          productRows.innerHTML = '<tr><td colspan="5" class="muted">No products yet.</td></tr>';
+          return;
+        }
+        productRows.innerHTML = '';
+        products.forEach((prod) => {
+          const tr = document.createElement('tr');
+          const status = prod.isApproved ? 'Approved' : 'Pending';
+          tr.innerHTML = `
+            <td>${prod.name}</td>
+            <td>${fmtUSD(prod.unitPrice)}</td>
+            <td>${status}</td>
+            <td>${prod.ownerEmail || '-'}</td>
+            <td><button data-id="${prod.id}" class="primary" style="padding:4px 10px">Edit</button></td>`;
+          tr.querySelector('button').addEventListener('click', () => editProduct(prod.id));
+          productRows.appendChild(tr);
+        });
+      }
+
+      function editProduct(id){
+        const prod = products.find(p => p.id === id);
+        selectedId = id;
+        qs('#formTitle').textContent = prod ? `Edit: ${prod.name}` : 'Add Product';
+        qs('#prodName').value = prod?.name || '';
+        qs('#prodDescription').value = prod?.description || '';
+        qs('#prodPrice').value = prod?.unitPrice || '';
+        qs('#prodWarranty').value = prod?.warrantyText || '';
+        qs('#prodScope').value = Array.isArray(prod?.scopeBullets) ? prod.scopeBullets.join('\n') : '';
+        qs('#prodComponents').value = Array.isArray(prod?.componentBullets) ? prod.componentBullets.join('\n') : '';
+        qs('#prodTags').value = Array.isArray(prod?.tags) ? prod.tags.join(', ') : '';
+        qs('#prodApproved').checked = !!prod?.isApproved;
+        qs('#prodCustom').checked = !!prod?.isCustom;
+        setFormStatus('');
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const payload = {
+          name: qs('#prodName').value.trim(),
+          description: qs('#prodDescription').value.trim(),
+          unitPrice: parseFloat(qs('#prodPrice').value) || 0,
+          warrantyText: qs('#prodWarranty').value.trim(),
+          scopeBullets: qs('#prodScope').value.split('\n').map(x => x.trim()).filter(Boolean),
+          componentBullets: qs('#prodComponents').value.split('\n').map(x => x.trim()).filter(Boolean),
+          tags: qs('#prodTags').value.split(',').map(x => x.trim()).filter(Boolean),
+          isApproved: qs('#prodApproved').checked,
+          isCustom: qs('#prodCustom').checked,
+        };
+        if(!payload.name){
+          setFormStatus('Name is required.', true);
+          return;
+        }
+        try{
+          const method = selectedId ? 'PUT' : 'POST';
+          const url = selectedId ? `/api/products/${selectedId}` : '/api/products';
+          const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if(!res.ok){
+            const text = await res.text();
+            throw new Error(text || 'Unable to save product.');
+          }
+          setFormStatus('Product saved.');
+          await loadProducts();
+        }catch(err){
+          console.error(err);
+          setFormStatus(err.message || 'Unable to save product.', true);
+        }
+      });
+
+      qs('#deleteProductBtn').addEventListener('click', async () => {
+        if(!selectedId){
+          setFormStatus('Select a product first.', true);
+          return;
+        }
+        if(!confirm('Delete this product?')) return;
+        try{
+          const res = await fetch(`/api/products/${selectedId}`, { method: 'DELETE' });
+          if(!res.ok){
+            const text = await res.text();
+            throw new Error(text || 'Unable to delete product.');
+          }
+          setFormStatus('Product deleted.');
+          selectedId = null;
+          form.reset();
+          await loadProducts();
+        }catch(err){
+          console.error(err);
+          setFormStatus(err.message || 'Unable to delete product.', true);
+        }
+      });
+
+      qs('#newProductBtn').addEventListener('click', () => {
+        selectedId = null;
+        form.reset();
+        qs('#formTitle').textContent = 'Add Product';
+        setFormStatus('');
+      });
+
+      qs('#saveDefaultsBtn').addEventListener('click', async () => {
+        const scope = qs('#defaultScope').value.split('\n').map(x => x.trim()).filter(Boolean);
+        const disclaimer = qs('#defaultDisclaimer').value.trim();
+        try{
+          const res = await fetch('/api/settings/defaults', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ scopeBullets: scope, disclaimer })
+          });
+          if(!res.ok) throw new Error('Unable to save defaults.');
+          setDefaultsStatus('Defaults saved.');
+        }catch(err){
+          console.error(err);
+          setDefaultsStatus(err.message || 'Unable to save defaults.', true);
+        }
+      });
+
+      qs('#saveBrandingBtn').addEventListener('click', async () => {
+        const payload = {
+          companyName: qs('#brandName').value.trim(),
+          address: qs('#brandAddress').value.trim(),
+          phone: qs('#brandPhone').value.trim(),
+          website: qs('#brandWebsite').value.trim(),
+          logoUrl: qs('#brandLogo').value.trim(),
+          primaryColor: qs('#brandPrimary').value,
+          secondaryColor: qs('#brandSecondary').value,
+        };
+        if(!payload.companyName){
+          setBrandingStatus('Company name is required.', true);
+          return;
+        }
+        try{
+          const res = await fetch('/api/settings/branding', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if(!res.ok) throw new Error('Unable to save branding.');
+          setBrandingStatus('Branding saved.');
+        }catch(err){
+          console.error(err);
+          setBrandingStatus(err.message || 'Unable to save branding.', true);
+        }
+      });
+
+      qs('#brandPrimary').addEventListener('input', updateColorDisplays);
+      qs('#brandSecondary').addEventListener('input', updateColorDisplays);
+      document.querySelectorAll('[data-product-ai]').forEach(btn => {
+        btn.addEventListener('click', (event) => {
+          event.preventDefault();
+          const key = btn.getAttribute('data-product-ai');
+          openProductAiModal(key);
+        });
+      });
+      qs('#productAiCancel').addEventListener('click', closeProductAiModal);
+      qs('#productAiGenerate').addEventListener('click', runProductAiModal);
+      qs('#productAiApply').addEventListener('click', applyProductAiModal);
+
+      loadProducts();
+      loadDefaults();
+      loadBranding();
+    })();
+  </script>
+</body>
+</html>
+      const productAiTargets = {
+        scope: {
+          label: 'Product Scope Bullets',
+          section: 'scope',
+          textarea: () => qs('#prodScope'),
+          gatherPayload() {
+            const value = qs('#prodScope').value;
+            return {
+              section: 'scope',
+              systemName: qs('#prodName').value || 'Template',
+              totalSquares: 0,
+              currentList: value.split('\n').map(line => line.trim()).filter(Boolean),
+            };
+          },
+          apply(result) {
+            const value = result.list?.length ? result.list.join('\n') : (result.text || '');
+            qs('#prodScope').value = value;
+          }
+        },
+        components: {
+          label: 'Product Components',
+          section: 'components',
+          textarea: () => qs('#prodComponents'),
+          gatherPayload() {
+            const value = qs('#prodComponents').value;
+            return {
+              section: 'components',
+              systemName: qs('#prodName').value || 'Template',
+              totalSquares: 0,
+              currentList: value.split('\n').map(line => line.trim()).filter(Boolean),
+            };
+          },
+          apply(result) {
+            const value = result.list?.length ? result.list.join('\n') : (result.text || '');
+            qs('#prodComponents').value = value;
+          }
+        },
+        'product-warranty': {
+          label: 'Product Warranty',
+          section: 'warranty',
+          textarea: () => qs('#prodWarranty'),
+          gatherPayload() {
+            return {
+              section: 'warranty',
+              systemName: qs('#prodName').value || 'Template',
+              totalSquares: 0,
+              currentText: qs('#prodWarranty').value,
+            };
+          },
+          apply(result) {
+            qs('#prodWarranty').value = result.list?.join(' ') || result.text || '';
+          }
+        },
+        'default-warranty': {
+          label: 'Default Disclaimer',
+          section: 'warranty',
+          textarea: () => qs('#defaultDisclaimer'),
+          gatherPayload() {
+            return {
+              section: 'warranty',
+              systemName: 'Default Disclaimer',
+              totalSquares: 0,
+              currentText: qs('#defaultDisclaimer').value,
+            };
+          },
+          apply(result) {
+            qs('#defaultDisclaimer').value = result.list?.join(' ') || result.text || '';
+          }
+        }
+      };
+
+      function openProductAiModal(targetKey){
+        const target = productAiTargets[targetKey];
+        if(!target) return;
+        const textarea = target.textarea();
+        productAiState = {
+          targetKey,
+          target,
+          payload: target.gatherPayload(),
+          textarea,
+          result: null,
+        };
+        qs('#productAiTitle').textContent = target.label;
+        qs('#productAiContext').textContent = qs('#prodName').value ? `Template: ${qs('#prodName').value}` : 'Template';
+        qs('#productAiTextarea').value = textarea.value;
+        qs('#productAiStatus').textContent = 'Edit manually or click Generate.';
+        qs('#productAiModal').classList.add('show');
+      }
+
+      function closeProductAiModal(){
+        productAiState = null;
+        qs('#productAiModal').classList.remove('show');
+        qs('#productAiStatus').textContent = '';
+      }
+
+      async function runProductAiModal(){
+        if(!productAiState) return;
+        const target = productAiState.target;
+        qs('#productAiStatus').textContent = 'Generating with AI...';
+        try{
+          const payload = { ...productAiState.payload };
+          const res = await fetch('/api/ai/rewrite', {
+            method:'POST',
+            headers:{ 'Content-Type':'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if(!res.ok){
+            const text = await res.text();
+            throw new Error(text || 'Unable to reach AI service.');
+          }
+          const data = await res.json();
+          productAiState.result = data;
+          const value = data.list?.length ? data.list.join('\n') : (data.text || '');
+          if(value) {
+            qs('#productAiTextarea').value = value;
+          }
+          qs('#productAiStatus').textContent = 'AI suggestions ready.';
+        }catch(err){
+          console.error(err);
+          qs('#productAiStatus').textContent = err.message || 'AI request failed.';
+        }
+      }
+
+      function applyProductAiModal(){
+        if(!productAiState) return;
+        const target = productAiState.target;
+        const result = productAiState.result || { text: qs('#productAiTextarea').value.trim() };
+        target.apply(result);
+        closeProductAiModal();
+      }

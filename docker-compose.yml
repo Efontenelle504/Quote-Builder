@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: zuppardos_quote
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    env_file:
+      - backend/.env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/zuppardos_quote?schema=public
+      PORT: 4000
+      CLIENT_BASE_URL: http://localhost:4000
+      QUOTE_STORAGE_DIR: /app/storage/quotes
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./public:/app/public
+      - backend_storage:/app/storage
+
+volumes:
+  pgdata:
+  backend_storage:

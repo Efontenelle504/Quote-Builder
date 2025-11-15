@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  WON
+  LOST
+  ARCHIVED
+}
+
+model Product {
+  id               String   @id @default(uuid())
+  name             String
+  slug             String   @unique
+  category         String?
+  description      String?
+  unitPrice        Decimal? @db.Decimal(10, 2)
+  warrantyText     String?
+  scopeIntro       String?
+  scopeBullets     Json?
+  componentBullets Json?
+  tags             String[]
+  imageUrl         String?
+  isCustom         Boolean  @default(false)
+  isApproved       Boolean  @default(true)
+  createdBy        String?
+  ownerEmail       String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  quotes           Quote[]
+}
+
+model Quote {
+  id                       String      @id @default(uuid())
+  repId                    String?
+  repName                  String?
+  repPhone                 String?
+  repEmail                 String?
+  customerName             String?
+  customerEmail            String?
+  customerPhone            String?
+  customerAddress          String?
+  jobName                  String?
+  companyName              String?
+  companyAddress           String?
+  companyPhone             String?
+  companySite              String?
+  systemName               String?
+  productId                String?
+  product                  Product?    @relation(fields: [productId], references: [id])
+  rep                      SalesRep?   @relation(fields: [repId], references: [id])
+  fortified                Boolean     @default(false)
+  applyPreset              Boolean     @default(true)
+  showDisclaimer           Boolean     @default(false)
+  disclaimerText           String?
+  areas                    Json
+  deckAllowance            Json?
+  adders                   Json?
+  taxRate                  Decimal?    @db.Decimal(5, 2)
+  subtotal                 Decimal     @db.Decimal(12, 2)
+  total                    Decimal     @db.Decimal(12, 2)
+  scopeIntro               String?
+  scopeBullets             Json?
+  components               Json?
+  pricingLines             Json?
+  notes                    String?
+  altPlyText               String?
+  rawQuoteText             String?
+  pdfPath                  String?
+  goHighLevelOpportunityId String?
+  goHighLevelContactId     String?
+  status                   QuoteStatus @default(DRAFT)
+  createdAt                DateTime    @default(now())
+  updatedAt                DateTime    @updatedAt
+}
+
+model SalesRep {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String?
+  email     String?  @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  quotes    Quote[]
+}
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}

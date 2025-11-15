@@ -1,0 +1,1637 @@
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+<style>
+  :root {
+    --brand: #b11226;
+    --ink: #0a0a0a;
+    --muted: #666;
+    --border: #e5e5e5;
+    --bg: #f6f6f6;
+  }
+  * { box-sizing: border-box; }
+  body, #app { margin: 0; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', Arial, sans-serif; color: var(--ink); background: var(--bg); font-size: 14px; line-height: 1.5; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 8px; }
+  @media (min-width: 768px) { .wrap { padding: 16px; } }
+  .toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff; border-bottom: 2px solid var(--brand); position: sticky; top: 0; z-index: 100; gap: 8px; }
+  @media (min-width: 768px) { .toolbar { padding: 12px 16px; } }
+  .toolbar .brand { display: flex; align-items: center; gap: 8px; }
+  .toolbar img { height: 32px; width: auto; }
+  @media (min-width: 768px) { .toolbar img { height: 40px; } }
+  .toolbar .name { font-weight: 600; font-size: 14px; }
+  @media (min-width: 768px) { .toolbar .name { font-size: 18px; } }
+  .toolbar .controls { display: flex; gap: 6px; flex-wrap: wrap; }
+  @media (min-width: 768px) { .toolbar .controls { gap: 8px; } }
+  button { border: 1px solid var(--border); background: #fff; border-radius: 8px; padding: 10px 14px; cursor: pointer; font-size: 13px; font-weight: 500; min-height: 44px; touch-action: manipulation; }
+  @media (min-width: 768px) { button { padding: 8px 12px; min-height: auto; } }
+  button.primary { background: var(--brand); color: #fff; }
+  .grid { display: grid; gap: 12px; padding: 8px; }
+  @media (min-width: 768px) { .grid { gap: 16px; padding: 16px; } }
+  @media (min-width: 1024px) { .grid { grid-template-columns: 1fr 2fr; } }
+  .card { background: #fff; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 1px 0 rgba(0,0,0,0.03); }
+  .card > summary { cursor: pointer; padding: 14px 16px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 15px; user-select: none; -webkit-tap-highlight-color: transparent; }
+  @media (min-width: 768px) { .card > summary { padding: 12px 16px; font-size: 14px; } }
+  .card[open] > summary { border-bottom: none; }
+  .card .content { padding: 12px; }
+  @media (min-width: 768px) { .card .content { padding: 16px; } }
+  .row { display: grid; gap: 12px; }
+  @media (min-width: 640px) { .row-2 { grid-template-columns: 1fr 1fr; } .row-3 { grid-template-columns: 2fr 1fr 1fr; } }
+  label { display: block; font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+  @media (min-width: 768px) { label { font-size: 13px; } }
+  input, textarea, select { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 16px; font-family: inherit; -webkit-appearance: none; appearance: none; }
+  @media (min-width: 768px) { input, textarea, select { padding: 8px 10px; font-size: 14px; } }
+  input[type="checkbox"] {
+    width: auto;
+    min-width: auto;
+    height: 18px;
+    margin-right: 6px;
+    appearance: checkbox;
+    -webkit-appearance: checkbox;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+  }
+  .muted { color: var(--muted); font-size: 13px; }
+  @media (min-width: 768px) { .muted { font-size: 12px; } }
+  .preview-section { border: 1px solid var(--border); border-radius: 12px; background: #fff; }
+  .preview-section header { display: flex; flex-direction: column; gap: 12px; border-bottom: 2px solid var(--brand); padding: 12px; }
+  @media (min-width: 640px) { .preview-section header { flex-direction: row; justify-content: space-between; align-items: flex-start; padding: 16px; } }
+  .preview-section header .left { display: flex; gap: 10px; align-items: start; }
+  .preview-section header img { height: 40px; width: auto; }
+  @media (min-width: 640px) { .preview-section header img { height: 50px; } }
+  .preview-section header .company-info h2 { margin: 0 0 4px 0; font-size: 18px; font-weight: 700; line-height: 1.2; }
+  @media (min-width: 640px) { .preview-section header .company-info h2 { font-size: 20px; } }
+  .preview-section header .company-info .small { color: var(--muted); font-size: 12px; line-height: 1.4; }
+  @media (min-width: 640px) { .preview-section header .company-info .small { font-size: 11px; } }
+  .preview-section header .meta { text-align: left; }
+  @media (min-width: 640px) { .preview-section header .meta { text-align: right; } }
+  .preview-section header .meta .title { color: var(--brand); text-transform: uppercase; font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  @media (min-width: 640px) { .preview-section header .meta .title { font-size: 16px; } }
+  .preview-section h4 { margin: 0 0 12px 0; font-size: 17px; font-weight: 700; color: var(--ink); }
+  @media (min-width: 768px) { .preview-section h4 { font-size: 16px; } }
+  .preview-section p { margin: 0 0 12px 0; font-size: 15px; line-height: 1.6; }
+  @media (min-width: 768px) { .preview-section p { font-size: 14px; } }
+  .preview-section ul { margin: 8px 0; padding-left: 20px; }
+  .preview-section li { margin-bottom: 6px; font-size: 15px; line-height: 1.5; }
+  @media (min-width: 768px) { .preview-section li { font-size: 14px; } }
+  .preview-section table { font-size: 15px; width: 100%; overflow-x: auto; display: block; }
+  @media (min-width: 768px) { .preview-section table { font-size: 14px; display: table; } }
+  .preview-section table th { font-weight: 600; padding: 10px 6px; }
+  @media (min-width: 768px) { .preview-section table th { padding: 8px 4px; } }
+  .preview-section table td { padding: 8px 6px; }
+  @media (min-width: 768px) { .preview-section table td { padding: 6px 4px; } }
+  .preview-section section { padding: 12px; border-top: 1px solid var(--border); }
+  @media (min-width: 768px) { .preview-section section { padding: 16px; } }
+  .preview-section .totals { display: flex; flex-direction: column; gap: 8px; padding: 12px; background: #fafafa; border-top: 2px solid var(--brand); font-size: 15px; }
+  @media (min-width: 640px) { .preview-section .totals { flex-direction: row; justify-content: space-between; padding: 12px 16px; font-size: 14px; } }
+  .preview-section .totals .grand { color: var(--brand); font-weight: 700; font-size: 17px; }
+  @media (min-width: 640px) { .preview-section .totals .grand { font-size: 16px; } }
+  .preview-section [contenteditable="true"] { outline: 2px dashed #3b82f6; outline-offset: 2px; border-radius: 4px; background: #eff6ff; padding: 4px; cursor: text; }
+  .preview-section [contenteditable="true"]:hover { background: #dbeafe; }
+  .preview-section [contenteditable="true"]:focus { outline: 2px solid #3b82f6; background: #fff; }
+  .ai-btn { display: none; border: 1px solid var(--border); background: #f9fafb; border-radius: 6px; padding: 4px 8px; font-size: 12px; cursor: pointer; margin-left: 8px; }
+  .preview-section.editing .ai-btn { display: inline-flex; align-items: center; gap: 4px; }
+  .ai-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+  .ai-modal-backdrop.show { display: flex; }
+  .ai-modal { background: #fff; border-radius: 12px; max-width: 520px; width: 100%; padding: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); display: flex; flex-direction: column; gap: 12px; }
+  .ai-modal textarea { width: 100%; min-height: 180px; border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-family: inherit; }
+  .ai-modal .actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+  .ai-modal button { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; }
+  .ai-modal button.primary { background: var(--brand); color: #fff; border: none; }
+
+  /* Mobile-specific optimizations */
+  @media (max-width: 1023px) {
+    .grid > section:last-child { display: none; }
+    .grid > section:last-child.show-mobile { display: block; }
+    #mobileQuoteToggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 200;
+      padding: 14px 20px;
+      font-size: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border-radius: 30px;
+    }
+    #mobileQuoteToggle.viewing {
+      bottom: auto;
+      top: 70px;
+      background: #fff;
+      color: var(--brand);
+    }
+  }
+  @media (min-width: 1024px) {
+    #mobileQuoteToggle { display: none !important; }
+  }
+
+  /* Print styles */
+  @media print {
+    body, #app { background: white; }
+    .toolbar { display: none !important; }
+    .grid { display: block !important; padding: 0 !important; }
+    .grid > section:first-child { display: none !important; }
+    .grid > section:last-child { display: block !important; }
+    .preview-section { border: none !important; box-shadow: none !important; }
+    .preview-section [contenteditable="true"] { outline: none !important; background: transparent !important; padding: 0 !important; }
+    .grid > section:last-child > .card:last-child { display: none !important; }
+    .preview-section .totals { page-break-inside: avoid; }
+    .preview-section section { page-break-inside: avoid; }
+  }
+</style>
+
+<div id="app">
+  <div class="toolbar">
+    <div class="brand">
+      <img src="https://zuppardosrenovations.com/wp-content/uploads/2024/11/64ee5a67dae52024c3e16f6a_ZR-Official-Logo-2-p-500.png" alt="Zuppardo's Renovations" />
+      <div class="name">Zuppardo's Renovations LLC</div>
+    </div>
+    <div class="controls">
+      <button id="mobileQuoteToggle" class="primary">View Quote</button>
+      <button id="saveQuoteBtn" class="primary">Save Quote</button>
+      <button id="syncQuoteBtn">Save + Sync GHL</button>
+      <button id="editToggle">Enable Edit Preview</button>
+      <button id="printBtn">Print / Save PDF</button>
+      <button id="copyBtn">Copy Quote Text</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+  </div>
+  <div id="saveStatus" class="muted" style="padding:8px 16px;"></div>
+  <div class="wrap grid">
+    <!-- Left column: inputs -->
+    <section>
+      <details class="card" open>
+        <summary>Company & Rep</summary>
+        <div class="content">
+          <div class="row row-2">
+            <label>Sales Rep
+              <select id="repSelect">
+                <option value="">Select a rep…</option>
+              </select>
+            </label>
+          </div>
+          <div class="row">
+            <label>Company Name<input data-bind="co.name" /></label>
+            <label>Address<input data-bind="co.address" /></label>
+            <label>Phone<input data-bind="co.phone" /></label>
+            <label>Website<input data-bind="co.url" /></label>
+          </div>
+          <div class="row row-2" style="margin-top:12px">
+            <label>Rep Name<input data-bind="rep.name" /></label>
+            <label>Rep Phone<input data-bind="rep.phone" /></label>
+            <label>Rep Email<input data-bind="rep.email" /></label>
+          </div>
+        </div>
+      </details>
+      <details class="card" open>
+        <summary>Customer</summary>
+        <div class="content">
+          <div class="row">
+            <label>Name<input data-bind="cust.name" /></label>
+            <label>Email<input data-bind="cust.email" /></label>
+            <label>Phone<input data-bind="cust.phone" /></label>
+            <label>Address<input data-bind="cust.address" /></label>
+          </div>
+          <div class="row row-2" style="margin-top:12px">
+            <label>Quote Date<input data-bind="qdate" /></label>
+            <label>Job Name<input data-bind="job" /></label>
+          </div>
+          <div class="row" style="margin-top:12px">
+            <div style="width:100%">
+              <label style="width:100%">Quick Paste (GHL contact)
+                <textarea id="pasteBox" rows="4" placeholder="Paste lines like:\nName: Jane Doe\nEmail: jane@example.com\nPhone: +15045551234\nAddress: 123 Main St, Metairie, LA"></textarea>
+              </label>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px">
+                <button id="pasteBtn">Parse & Fill</button>
+                <button id="lookupBtn">Lookup in GHL</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </details>
+      <details class="card" open>
+        <summary>System & Pricing</summary>
+        <div class="content">
+          <label>System Type
+            <select data-bind="sys">
+              <option>GAF Timberline HDZ (50-Year System Warranty)</option>
+              <option>Owens Corning Duration (Platinum Preferred Warranty)</option>
+              <option>Standing Seam</option>
+              <option>Unified Steel Granite Ridge (Stone-Coated Steel)</option>
+              <option>R-Panel Metal Roofing</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label class="flex" style="margin-top:8px"><input type="checkbox" data-bind="applyPreset" /> Apply preset unit price to all areas</label>
+          <label class="flex" style="margin-top:4px"><input type="checkbox" data-bind="fortified" /> Include IBHS FORTIFIED Roof language</label>
+          <label class="flex" style="margin-top:4px"><input type="checkbox" data-bind="showDisclaimer" /> Include estimate disclaimer (not a contract)</label>
+        </div>
+      </details>
+      <details class="card">
+        <summary>Custom Products Manager</summary>
+        <div class="content">
+          <div style="margin-bottom:12px">
+            <label>Product Name<input id="customProdName" placeholder="e.g., Custom Metal Panel" /></label>
+            <label style="margin-top:8px">Unit Price ($/sq)<input id="customProdPrice" type="number" placeholder="e.g., 800" /></label>
+            <label style="margin-top:8px">Warranty<textarea id="customProdWarranty" rows="2" placeholder="Manufacturer warranty details..."></textarea></label>
+            <label style="margin-top:8px">Components (one per line)<textarea id="customProdComps" rows="3" placeholder="Component 1\nComponent 2\nComponent 3"></textarea></label>
+            <label style="margin-top:8px">Scope Items (one per line)<textarea id="customProdScope" rows="3" placeholder="Scope item 1\nScope item 2"></textarea></label>
+            <button id="saveCustomProduct" style="margin-top:8px; width:100%">Save Custom Product</button>
+            <div id="customProductStatus" class="muted" style="margin-top:8px"></div>
+          </div>
+          <div id="customProductsList" style="margin-top:12px"></div>
+        </div>
+      </details>
+      <details class="card" open>
+        <summary>Areas & Squares</summary>
+        <div class="content">
+          <div class="flex" style="justify-content:space-between; align-items:center; margin-bottom:8px">
+            <span></span>
+            <button id="addAreaBtn">Add Area</button>
+          </div>
+          <div id="areas"></div>
+        </div>
+      </details>
+      <details class="card" open>
+        <summary>Adders & Options</summary>
+        <div class="content">
+          <div class="flex" style="align-items:center">
+            <label class="flex"><input type="checkbox" data-bind="deck.include" /> Include Decking Allowance</label>
+          </div>
+          <div id="deckRow" class="row row-3" style="margin-top:8px; display:none">
+            <label>Est. Sheets<input type="number" data-bind="deck.estSheets" min="0" /></label>
+            <label>Sheet Price<input type="number" data-bind="deck.sheetPrice" min="0" /></label>
+            <label>Free Sheets<input type="number" data-bind="deck.freeSheets" min="0" /></label>
+          </div>
+          <label class="flex" style="margin-top:8px"><input type="checkbox" data-bind="showAltPly" /> Show option: Customer-supplied plywood (labor-only @ $25/sq)</label>
+          <label style="margin-top:8px">Sales Tax (%)<input type="number" data-bind="tax" min="0" /></label>
+        </div>
+      </details>
+      <details class="card" open>
+        <summary>Scope Override / Notes (optional)</summary>
+        <div class="content">
+          <textarea id="scopeOverride" rows="4" placeholder="Add project-specific notes, alternates, inclusions/exclusions. These will appear in the quote."></textarea>
+        </div>
+      </details>
+    </section>
+    <!-- Right column: preview -->
+    <section>
+      <div class="preview-section" id="preview">
+        <header>
+          <div class="left">
+            <img src="https://zuppardosrenovations.com/wp-content/uploads/2024/11/64ee5a67dae52024c3e16f6a_ZR-Official-Logo-2-p-500.png" alt="Zuppardo's Renovations" />
+            <div class="company-info">
+              <h2 id="pCoName" data-edit="co.name"></h2>
+              <div class="small" id="pCoAddr" data-edit="co.address"></div>
+              <div class="small">Phone: <span id="pCoPhone" data-edit="co.phone"></span></div>
+              <div class="small" id="pCoUrl" data-edit="co.url"></div>
+            </div>
+          </div>
+          <div class="meta">
+            <div class="title">Estimate</div>
+            <div class="small" id="pDate" data-edit="qdate"></div>
+          </div>
+        </header>
+        <section>
+          <div class="row row-2">
+            <div class="card" style="padding:12px">
+              <div class="muted">Company Representative</div>
+              <div id="pRepName" style="font-weight:600" data-edit="rep.name"></div>
+              <div class="muted"><span id="pRepPhone" data-edit="rep.phone"></span></div>
+              <div class="muted"><span id="pRepEmail" data-edit="rep.email"></span></div>
+            </div>
+            <div class="card" style="padding:12px">
+              <div class="muted">Customer</div>
+              <div id="pCustName" style="font-weight:600" data-edit="cust.name"></div>
+              <div class="muted"><span id="pCustAddr" data-edit="cust.address"></span></div>
+              <div class="muted"><span id="pCustEmail" data-edit="cust.email"></span></div>
+              <div class="muted"><span id="pCustPhone" data-edit="cust.phone"></span></div>
+            </div>
+          </div>
+          <div class="muted" id="pJob" data-edit="job" style="margin-top:8px"></div>
+        </section>
+        <section>
+          <h4>Areas & Quantities (squares rounded up)</h4>
+          <table style="width:100%; border-collapse: collapse;">
+            <thead><tr><th style="text-align:left">Area</th><th style="text-align:right">Squares</th><th style="text-align:right">Line Total</th></tr></thead>
+            <tbody id="pAreaRows"></tbody>
+          </table>
+        </section>
+        <section>
+          <h4>Installation Scope <button class="ai-btn" data-ai-target="scope">AI Rewrite</button></h4>
+          <p id="pScopeIntro" data-edit="scopeIntroOverride"></p>
+          <div id="pScopeList" data-edit="scopeListText"></div>
+          <div id="pNotesContainer" style="margin-top:8px; display:none">
+            <div style="font-weight:600">Project-Specific Notes <button class="ai-btn" data-ai-target="notes" style="margin-left:4px;">AI Rewrite</button></div>
+            <div id="pScopeNotes" data-edit="scopeNotes"></div>
+          </div>
+        </section>
+        <section>
+          <h4>System Components <button class="ai-btn" data-ai-target="components">AI Rewrite</button></h4>
+          <div id="pCompsList" data-edit="componentsText"></div>
+        </section>
+        <section>
+          <h4>Warranties <button class="ai-btn" data-ai-target="warranty">AI Rewrite</button></h4>
+          <ul id="pWarrantyList">
+            <li>Lifetime workmanship – Zuppardo's Renovations LLC</li>
+            <li id="pWarrantyLine" data-edit="warrantyOverride"></li>
+          </ul>
+        </section>
+        <section id="pDisclaimerContainer" style="display:none">
+          <h4>Important Notice</h4>
+          <div id="pDisclaimer" data-edit="disclaimerText" style="font-style: italic; padding: 12px; background: #fffbeb; border-left: 3px solid #f59e0b; border-radius: 4px;">
+            This estimate is provided in good faith based on the information available at the time of preparation. This is not a contract. Final pricing and scope of work are subject to change pending an in-person inspection to verify conditions and identify any underlying structural issues, code requirements, or unforeseen circumstances that may require additional work. Any changes to the scope or price will be communicated and approved before work commences.
+          </div>
+        </section>
+        <section>
+          <h4>Pricing Summary</h4>
+          <div id="pPricing" data-edit="pricingText"></div>
+        </section>
+        <section id="pAltPlyContainer" style="display:none">
+          <h4>Option – Customer-Supplied Plywood (Labor-Only)</h4>
+          <div id="pAltPlyLine" data-edit="altPlyText"></div>
+        </section>
+        <section>
+          <div class="row row-2" style="margin-top:16px">
+            <div>
+              <div class="muted">Company Authorized Signature</div>
+              <div style="height:40px; border-bottom:1px solid var(--border);"></div>
+            </div>
+            <div>
+              <div class="muted">Customer Signature</div>
+              <div style="height:40px; border-bottom:1px solid var(--border);"></div>
+            </div>
+          </div>
+        </section>
+        <div class="totals">
+          <div>Squares (rounded): <strong id="pTotalSq"></strong></div>
+          <div>Subtotal: <strong id="pSubtotal"></strong></div>
+          <div>Total: <strong id="pGrand" class="grand"></strong></div>
+        </div>
+      </div>
+      <details class="card" style="margin-top:16px" open>
+        <summary>Raw Quote Text (for copy/paste)</summary>
+        <div class="content"><textarea id="quoteBox" rows="8" style="width:100%; font-family:monospace" readonly></textarea></div>
+      </details>
+    </section>
+  </div>
+</div>
+
+<div class="ai-modal-backdrop" id="aiModal">
+  <div class="ai-modal">
+    <div>
+      <h3 id="aiModalTitle" style="margin:0 0 4px 0;"></h3>
+      <div class="muted" id="aiModalContext"></div>
+    </div>
+    <textarea id="aiModalTextarea"></textarea>
+    <div class="actions">
+      <button id="aiModalGenerate">Generate</button>
+      <button id="aiModalApply" class="primary">Apply</button>
+      <button id="aiModalCancel">Cancel</button>
+    </div>
+    <div class="muted" id="aiModalStatus"></div>
+  </div>
+</div>
+
+<script>
+// Quote builder script
+(() => {
+  // Helper functions
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+  const fmtUSD = (n) => (isFinite(n) ? Number(n) : 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  const today = () => { const d = new Date(); return `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}/${d.getFullYear()}`; };
+  const ceilSq = (v) => Math.max(0, Math.ceil(Number(v || 0)));
+  const templateKeys = ['TOTAL_SQUARES','SYSTEM_NAME'];
+  const applyTemplateText = (text, ctx) => {
+    if(typeof text !== 'string') return text;
+    return text.replace(/\{\{\s*([A-Z0-9_]+)\s*\}\}/gi, (match, key) => {
+      const upper = key.toUpperCase();
+      return Object.prototype.hasOwnProperty.call(ctx, upper) ? ctx[upper] : match;
+    });
+  };
+  const applyTemplateList = (list, ctx) => (Array.isArray(list) ? list : []).map(line => applyTemplateText(line, ctx));
+
+  // Presets for unit price, warranty, components and scope
+  const BASE_SCOPE_LINES = [
+    'Protect landscaping, set safety perimeter, and conduct pre-job walkthrough.',
+    'Remove existing roof covering down to the deck; inspect substrate; photo-document conditions.',
+    'Replace damaged decking as authorized; re-nail existing decking to code where required.',
+    'Install synthetic underlayment and leak barriers per plan; new metal drip and rake edges.',
+    'Replace or fabricate flashings at penetrations, valleys, walls, and transitions; apply sealants as specified.',
+    'Provide balanced attic ventilation per code/manufacturer; verify intake and exhaust.',
+    'Follow manufacturer details for exposure, fastener type/count and layout; comply with local code.',
+    'Daily cleanup and magnetic nail sweep; debris haul-off; final QA checklist with photos.'
+  ];
+
+  const DEFAULT_PRODUCTS = {
+    'GAF Timberline HDZ (50-Year System Warranty)': {
+      unitPrice: 500,
+      warranty: 'GAF Gold Pledge Warranty: lifetime materials (50 years non-prorated), 25-year workmanship, 15-year wind warranty, algae resistance, and includes tear-off & disposal.',
+      comps: ['Use qualifying GAF components', 'Install Timberline HDZ shingles per GAF details'],
+      scope: ['Install qualifying GAF components for full system coverage', 'Timberline HDZ shingles installed following manufacturer requirements']
+    },
+    'Owens Corning Duration (Platinum Preferred Warranty)': {
+      unitPrice: 500,
+      warranty: 'Owens Corning Platinum Warranty: 50-year coverage on materials, labor, tear-off & disposal with 25-year workmanship protection, plus wind and algae protection.',
+      comps: ['Use qualifying Owens Corning components', 'Install Duration shingles per OC specifications'],
+      scope: ['Install qualifying Owens Corning components for full system coverage', 'Duration shingles installed per OC specifications']
+    },
+    'Standing Seam': {
+      unitPrice: 1350,
+      warranty: 'Manufacturer panel and paint warranties apply; includes lifetime workmanship warranty from Zuppardo’s.',
+      comps: ['Concealed-fastener standing-seam panels with clips & underlayment', 'Fabricate flashings, closures & sealants at perimeters & penetrations'],
+      scope: ['Install concealed-fastener standing-seam panels with approved clips/fasteners and hemmed eaves', 'Fabricate edge, wall, valley & ridge flashings with closures; allow for thermal movement']
+    },
+    'Unified Steel Granite Ridge (Stone-Coated Steel)': {
+      unitPrice: 1400,
+      warranty: 'Unified Steel Granite Ridge Warranty: 50-year property-based coverage with 20-year manufacturer workmanship; includes Zuppardo’s lifetime workmanship warranty.',
+      comps: ['Granite Ridge panels with trims & accessories', 'Underlayment, flashings, fasteners & ventilation per manufacturer'],
+      scope: ['Install Granite Ridge panels following manufacturer’s fastener schedule & coursing', 'Use approved trims, foam closures & accessories for sealed, wind-resistant assembly']
+    },
+    'R-Panel Metal Roofing': {
+      unitPrice: 700,
+      warranty: 'Manufacturer material & paint warranties apply; includes Zuppardo’s lifetime workmanship warranty.',
+      comps: ['Exposed-fastener R-panel with closures & sealants', 'Underlayment and flashings at all perimeters & penetrations'],
+      scope: ['Install exposed-fastener R-panels with specified fastener spacing & laps', 'Seal sidelaps & endlaps with sealant and closures at eaves, ridges & penetrations']
+    },
+    'Other': {
+      unitPrice: 0,
+      warranty: 'As specified; manufacturer warranties apply.',
+      comps: ['As specified'],
+      scope: []
+    }
+  };
+
+  const slugify = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+  const DEFAULT_PRODUCT_LIST = Object.entries(DEFAULT_PRODUCTS).map(([name, data]) => ({
+    ...data,
+    name,
+    slug: slugify(name),
+    isDefault: true,
+    isCustom: false,
+    isApproved: true
+  }));
+
+  const DEFAULT_DISCLAIMER_TEXT = 'This estimate is provided in good faith based on the information available at the time of preparation. This is not a contract. Final pricing and scope of work are subject to change pending an in-person inspection to verify conditions and identify any underlying structural issues, code requirements, or unforeseen circumstances that may require additional work. Any changes to the scope or price will be communicated and approved before work commences.';
+
+  let productMap = new Map(DEFAULT_PRODUCT_LIST.map((item) => [item.name, item]));
+  let remoteProducts = [];
+  let customProductList = [];
+  let repOptions = [];
+  let aiModalState = null;
+
+  // State
+  const state = {
+    co: { name: "Zuppardo's Renovations LLC", address: '4405 Senac Drive, Metairie, LA 70003', phone: '(504) 493-7777', url: 'https://ZuppardosRenovations.com' },
+    rep: { name:'', phone:'', email:'' },
+    repId:'',
+    fortified: false,
+    qdate: today(),
+    cust: { name:'', address:'', phone:'', email:'' },
+    job:'',
+    sys:'GAF Timberline HDZ (50-Year System Warranty)',
+    systemSlug: slugify('GAF Timberline HDZ (50-Year System Warranty)'),
+    applyPreset:true,
+    areas:[ { id:1, name:'Main roof', squares:0, unitPrice: DEFAULT_PRODUCTS['GAF Timberline HDZ (50-Year System Warranty)'].unitPrice, include:true } ],
+    deck:{ include:false, estSheets:0, sheetPrice:85, freeSheets:5 },
+    showAltPly:true,
+    tax:0,
+    scopeIntroOverride:'',
+    warrantyOverride:'',
+    componentsOverride:null,
+    componentsText:'',
+    scopeListText:'',
+    scopeNotes:'',
+    pricingText:'',
+    altPlyText:'',
+    showDisclaimer:false,
+    disclaimerText: DEFAULT_DISCLAIMER_TEXT
+  };
+
+  // Load from localStorage
+  try {
+    const saved = JSON.parse(localStorage.getItem('zupp_quote_state')||'null');
+    if(saved){
+      // Deep merge to preserve nested object defaults
+      Object.keys(saved).forEach(key => {
+        if(saved[key] && typeof saved[key] === 'object' && !Array.isArray(saved[key]) && state[key] && typeof state[key] === 'object' && !Array.isArray(state[key])){
+          // Merge nested objects
+          Object.assign(state[key], saved[key]);
+        } else {
+          state[key] = saved[key];
+        }
+      });
+    }
+  } catch(e) {
+    console.error('Error loading state:', e);
+  }
+
+  // Save to localStorage
+  function save(){ try{ localStorage.setItem('zupp_quote_state', JSON.stringify(state)); }catch{} }
+
+  function normalizeProduct(product){
+    return {
+      name: product.name,
+      slug: product.slug || slugify(product.name),
+      unitPrice: Number(product.unitPrice || 0),
+      warranty: product.warrantyText || 'As specified; manufacturer warranties apply.',
+      comps: Array.isArray(product.componentBullets) ? product.componentBullets : [],
+      scope: Array.isArray(product.scopeBullets) ? product.scopeBullets : [],
+      scopeIntro: product.scopeIntro,
+      description: product.description,
+      productId: product.id,
+      isCustom: !!product.isCustom,
+      isApproved: !!product.isApproved,
+      ownerEmail: product.ownerEmail || '',
+      createdBy: product.createdBy || ''
+    };
+  }
+
+  function rebuildProductMap(){
+    productMap = new Map(DEFAULT_PRODUCT_LIST.map((item) => [item.name, item]));
+    remoteProducts.forEach((prod) => productMap.set(prod.name, prod));
+    customProductList = remoteProducts.filter((prod) => prod.isCustom);
+  }
+
+  async function fetchDefaults(){
+    try{
+      const res = await fetch('/api/settings/defaults');
+      if(!res.ok) throw new Error('Unable to load defaults');
+      const data = await res.json();
+      if(data.company){
+        Object.assign(state.co, data.company);
+      }
+      if(data.disclaimer && state.disclaimerText === DEFAULT_DISCLAIMER_TEXT){
+        state.disclaimerText = data.disclaimer;
+      }
+      save();
+      render();
+    }catch(err){
+      console.warn('Unable to load defaults', err);
+    }
+  }
+
+  async function fetchProducts(){
+    try{
+      const res = await fetch('/api/products?includeUnapproved=true');
+      if(!res.ok) throw new Error('Unable to load products');
+      const data = await res.json();
+      remoteProducts = (Array.isArray(data) ? data : []).map(normalizeProduct);
+      rebuildProductMap();
+      updateSystemSelect();
+      renderCustomProducts();
+      if(!state.sys || !productMap.has(state.sys)){
+        const first = productMap.values().next().value;
+        if(first){
+          state.sys = first.name;
+          state.systemSlug = first.slug;
+        }
+      }
+      updatePreset();
+    }catch(err){
+      console.warn('Unable to load product catalog', err);
+    }
+  }
+
+  function applyBranding(data){
+    if(!data) return;
+    const root = document.documentElement;
+    if(data.primaryColor) root.style.setProperty('--brand', data.primaryColor);
+    if(data.secondaryColor) root.style.setProperty('--ink', data.secondaryColor);
+    state.co.name = data.companyName || state.co.name;
+    state.co.address = data.address || state.co.address;
+    state.co.phone = data.phone || state.co.phone;
+    state.co.url = data.website || state.co.url;
+    if(data.logoUrl){
+      const logo = document.querySelectorAll('img[alt="Zuppardo\'s Renovations"]');
+      logo.forEach(img => img.src = data.logoUrl);
+    }
+    syncBoundInputs();
+    render();
+  }
+
+  async function fetchBranding(){
+    try{
+      const res = await fetch('/api/settings/branding');
+      if(!res.ok) throw new Error('Unable to load branding');
+      const data = await res.json();
+      applyBranding(data);
+    }catch(err){
+      console.warn('Unable to load branding', err);
+    }
+  }
+
+  async function fetchReps(){
+    try{
+      const res = await fetch('/api/sales-reps');
+      if(!res.ok) throw new Error('Unable to load reps');
+      const data = await res.json();
+      repOptions = Array.isArray(data) ? data.filter((rep) => rep.active !== false) : [];
+      const select = $('#repSelect');
+      if(select){
+        const current = state.repId;
+        select.innerHTML = '<option value=\"\">Select a rep…</option>';
+        repOptions.forEach(rep => {
+          const opt = document.createElement('option');
+          opt.value = rep.id;
+          opt.textContent = rep.name;
+          select.appendChild(opt);
+        });
+        if(current && repOptions.some(r => r.id === current)){
+          select.value = current;
+        }
+      }
+    }catch(err){
+      console.warn('Unable to load reps', err);
+    }
+  }
+
+  function setStatus(message, isError){
+    const el = $('#saveStatus');
+    if(!el) return;
+    el.innerHTML = message || '';
+    el.style.color = isError ? '#b11226' : '#0a0a0a';
+    if(message){
+      clearTimeout(setStatus._timer);
+      setStatus._timer = setTimeout(() => {
+        el.textContent = '';
+      }, 5000);
+    }
+  }
+
+  const parseLines = (text) => (text || '')
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean);
+
+  function buildQuotePayload(sync){
+    const scopeOverride = $('#scopeOverride').value.trim();
+    const scopeLines = parseLines(state.scopeListText || '');
+    const componentsLines = parseLines(state.componentsText || '');
+    const pricingLines = parseLines(state.pricingText || '');
+    return {
+      company: state.co,
+      rep: state.rep,
+      repId: state.repId || undefined,
+      customer: state.cust,
+      jobName: state.job,
+      systemName: state.sys,
+      systemSlug: state.systemSlug || slugify(state.sys || 'custom'),
+      fortified: state.fortified,
+      applyPreset: state.applyPreset,
+      showDisclaimer: state.showDisclaimer,
+      disclaimerText: state.disclaimerText,
+      taxRate: Number(state.tax || 0),
+      deck: state.deck,
+      areas: state.areas,
+      notes: scopeOverride || undefined,
+      scopeIntroOverride: state.scopeIntroOverride || undefined,
+      scopeBulletsOverride: scopeLines.length ? scopeLines : undefined,
+      componentsOverride: componentsLines.length ? componentsLines : undefined,
+      warrantyOverride: state.warrantyOverride || undefined,
+      pricingOverride: pricingLines.length ? pricingLines : undefined,
+      altPlyText: state.altPlyText || undefined,
+      syncOnSave: sync
+    };
+  }
+
+  async function saveQuote({ sync } = { sync: false }){
+    setStatus(sync ? 'Saving and syncing quote...' : 'Saving quote...');
+    try{
+      const payload = buildQuotePayload(sync);
+      const res = await fetch('/api/quotes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if(!res.ok){
+        const text = await res.text();
+        let message = 'Unable to save quote.';
+        try {
+          const parsed = JSON.parse(text);
+          message = parsed.message || message;
+        } catch {
+          if(text) message = text;
+        }
+        throw new Error(message);
+      }
+      const data = await res.json();
+      const link = data?.id ? `<a href=\"/api/quotes/${data.id}/pdf\" target=\"_blank\" rel=\"noreferrer\">Open PDF</a>` : '';
+      const ghlNote = sync ? ' Synced to GoHighLevel.' : '';
+      setStatus(`Quote ${data?.id || ''} saved.${ghlNote} ${link}`);
+    }catch(err){
+      console.error(err);
+      setStatus(err.message || 'Unable to save quote.', true);
+    }
+  }
+
+  async function lookupCRMContact(){
+    const email = state.cust.email || '';
+    const phone = state.cust.phone || '';
+    if(!email && !phone){
+      alert('Please enter an email or phone number before looking up a contact.');
+      return;
+    }
+    setStatus('Looking up contact in GoHighLevel...');
+    try{
+      const res = await fetch('/api/crm/lookup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, phone })
+      });
+      if(!res.ok){
+        const text = await res.text();
+        throw new Error(text || 'Contact not found.');
+      }
+      const contact = await res.json();
+      const record = contact?.contact || contact;
+      if(record){
+        state.cust.name = record.fullName || record.name || state.cust.name;
+        state.cust.email = record.email || record.emailAddress || state.cust.email;
+        state.cust.phone = record.phone || record.phoneNumber || state.cust.phone;
+        const street = record.address || record.address1 || '';
+        const cityState = [record.city, record.state, record.postalCode].filter(Boolean).join(', ');
+        const combinedAddress = [street, cityState].filter(Boolean).join(' ').trim();
+        state.cust.address = combinedAddress || state.cust.address;
+        syncBoundInputs();
+        save();
+        render();
+      }
+      setStatus('Contact imported from GoHighLevel.');
+    }catch(err){
+      console.error(err);
+      setStatus(err.message || 'Unable to lookup contact.', true);
+    }
+  }
+
+
+  async function loadQuoteById(id){
+    try{
+      const res = await fetch(`/api/quotes/${id}`);
+      if(!res.ok) throw new Error('Quote not found');
+      const data = await res.json();
+      state.co = {
+        name: data.companyName || state.co.name,
+        address: data.companyAddress || state.co.address,
+        phone: data.companyPhone || state.co.phone,
+        url: data.companySite || state.co.url
+      };
+      state.rep = {
+        name: data.repName || '',
+        phone: data.repPhone || '',
+        email: data.repEmail || ''
+      };
+      state.repId = data.repId || '';
+      state.cust = {
+        name: data.customerName || '',
+        phone: data.customerPhone || '',
+        email: data.customerEmail || '',
+        address: data.customerAddress || ''
+      };
+      state.job = data.jobName || '';
+      state.sys = data.systemName || state.sys;
+      state.systemSlug = data.systemSlug || slugify(state.sys);
+      state.areas = Array.isArray(data.areas) && data.areas.length
+        ? data.areas.map((area, idx) => ({
+            id: area.id || idx + 1,
+            name: area.name || `Area ${idx + 1}`,
+            squares: area.squares || 0,
+            unitPrice: area.unitPrice || area.lineTotal || 0,
+            include: area.include !== false
+          }))
+        : state.areas;
+      state.deck = data.deckAllowance || state.deck;
+      state.tax = data.taxRate || 0;
+      state.scopeIntroOverride = data.scopeIntro || '';
+      state.scopeListText = Array.isArray(data.scopeBullets) ? data.scopeBullets.join('\\n') : '';
+      state.componentsText = Array.isArray(data.components) ? data.components.join('\\n') : '';
+      state.pricingText = Array.isArray(data.pricingLines) ? data.pricingLines.join('\\n') : '';
+      state.altPlyText = data.altPlyText || '';
+      state.showDisclaimer = !!data.showDisclaimer;
+      state.disclaimerText = data.disclaimerText || state.disclaimerText;
+      save();
+      renderAreas();
+      render();
+      syncBoundInputs();
+      setStatus('Quote loaded. Save to create a new copy.');
+    }catch(err){
+      console.error(err);
+      setStatus(err.message || 'Unable to load quote.', true);
+    }
+  }
+
+  async function loadQuoteFromQuery(){
+    const params = new URLSearchParams(window.location.search);
+    const quoteId = params.get('quote');
+    if(quoteId){
+      await loadQuoteById(quoteId);
+    }
+  }
+
+  // Parse contact block for Quick Paste
+  function parseContact(text){
+    const lines = String(text||'').split(/\r?\n/);
+    const out = {};
+    lines.forEach(line => {
+      const idx = line.indexOf(':');
+      if(idx<0) return;
+      const key = line.slice(0, idx).trim().toLowerCase();
+      const val = line.slice(idx+1).trim();
+      if(!val) return;
+      if(key==='name') out.name=val;
+      else if(key==='email') out.email=val;
+      else if(key==='phone') out.phone=val;
+      else if(key==='address') out.address=val;
+    });
+    return out;
+  }
+
+  function getTemplateContext(data, preset){
+    return {
+      TOTAL_SQUARES: String(data.totalSq || 0),
+      SYSTEM_NAME: state.sys || (preset && preset.name) || ''
+    };
+  }
+
+  function getScopeIntroText(preset, ctx){
+    if(state.scopeIntroOverride && state.scopeIntroOverride.trim()){
+      return state.scopeIntroOverride;
+    }
+    if(preset && preset.scopeIntro){
+      return applyTemplateText(preset.scopeIntro, ctx);
+    }
+    const base = `Furnish and install ${state.sys} on all listed roof areas. `;
+    const mid = state.fortified ? 'Install to IBHS FORTIFIED Roof standards (sealed deck/attachment/flashings/vents).' : 'Perform work per manufacturer instructions and applicable standards.';
+    return base + mid + ' Include accessories: new drip edge, pipe boots, flashings, valleys, and required fasteners.';
+  }
+
+  function getScopeLines(preset, ctx){
+    if(state.scopeListText && state.scopeListText.trim()){
+      return parseLines(state.scopeListText);
+    }
+    const hasPresetScope = Array.isArray(preset?.scope) && (preset?.scope?.length || 0) > 0;
+    const presetLines = hasPresetScope ? applyTemplateList(preset.scope, ctx) : [];
+    const fallback = hasPresetScope ? [] : applyTemplateList(BASE_SCOPE_LINES, ctx);
+    const lines = [...presetLines, ...fallback];
+    if(state.fortified && !lines.some(line => /fortified/i.test(line))){
+      lines.push('We guarantee the installation will be approved once evaluated by an independent FORTIFIED evaluator.');
+    }
+    return lines;
+  }
+
+  function getComponentLines(preset, ctx){
+    if(state.componentsText && state.componentsText.trim()){
+      return parseLines(state.componentsText);
+    }
+  const overrideList = Array.isArray(state.componentsOverride) && state.componentsOverride.length ? state.componentsOverride : null;
+  const source = overrideList || (preset && preset.comps) || [];
+  return applyTemplateList(source, ctx);
+  }
+
+  const AI_TARGETS = {
+    scope: {
+      label: 'Installation Scope',
+      section: 'scope',
+      gather(){
+        const data = calculate();
+        const preset = getActivePreset();
+        const ctx = getTemplateContext(data, preset);
+        return {
+          payload: {
+            section: 'scope',
+            systemName: state.sys,
+            totalSquares: data.totalSq,
+            currentText: getScopeIntroText(preset, ctx),
+            currentList: getScopeLines(preset, ctx),
+            notes: $('#scopeOverride').value.trim()
+          },
+          textareaValue: getScopeLines(preset, ctx).join('\n')
+        };
+      },
+      apply(result){
+        if(result.text) state.scopeIntroOverride = result.text;
+        if(result.list?.length) state.scopeListText = result.list.join('\n');
+        save(); render();
+      },
+      manualConvert(value){
+        const list = value.split('\n').map(line => line.trim()).filter(Boolean);
+        return { list };
+      }
+    },
+    components: {
+      label: 'System Components',
+      section: 'components',
+      gather(){
+        const data = calculate();
+        const preset = getActivePreset();
+        const ctx = getTemplateContext(data, preset);
+        const currentList = getComponentLines(preset, ctx);
+        return {
+          payload: {
+            section: 'components',
+            systemName: state.sys,
+            totalSquares: data.totalSq,
+            currentList
+          },
+          textareaValue: currentList.join('\n')
+        };
+      },
+      apply(result){
+        if(result.list?.length){
+          state.componentsText = result.list.join('\n');
+          state.componentsOverride = result.list;
+        }
+        if(result.text && !result.list?.length){
+          state.componentsText = result.text;
+          state.componentsOverride = result.text.split('\n').map(line => line.trim()).filter(Boolean);
+        }
+        save(); render();
+      },
+      manualConvert(value){
+        const list = value.split('\n').map(line => line.trim()).filter(Boolean);
+        return { list };
+      }
+    },
+    warranty: {
+      label: 'Warranties',
+      section: 'warranty',
+      gather(){
+        const data = calculate();
+        const preset = getActivePreset();
+        const ctx = getTemplateContext(data, preset);
+        const currentText = state.warrantyOverride || (preset && preset.warranty) || '';
+        return {
+          payload: {
+            section: 'warranty',
+            systemName: state.sys,
+            totalSquares: data.totalSq,
+            currentText
+          },
+          textareaValue: currentText
+        };
+      },
+      apply(result){
+        const text = result.text || (result.list ? result.list.join(' ') : '');
+        if(text){
+          state.warrantyOverride = text;
+          save(); render();
+        }
+      },
+      manualConvert(value){
+        return { text: value };
+      }
+    },
+    notes: {
+      label: 'Project Notes',
+      section: 'notes',
+      gather(){
+        const data = calculate();
+        const currentText = $('#scopeOverride').value.trim();
+        return {
+          payload: {
+            section: 'notes',
+            systemName: state.sys,
+            totalSquares: data.totalSq,
+            currentText,
+          },
+          textareaValue: currentText
+        };
+      },
+      apply(result){
+        const text = result.text || '';
+        $('#scopeOverride').value = text;
+        state.scopeNotes = text;
+        save(); render();
+      },
+      manualConvert(value){
+        return { text: value };
+      }
+    }
+  };
+
+  function openAiModal(targetKey){
+    const target = AI_TARGETS[targetKey];
+    if(!target) return;
+    const gathered = target.gather();
+    aiModalState = {
+      targetKey,
+      payload: gathered.payload,
+      result: null
+    };
+    $('#aiModalTitle').textContent = target.label;
+    $('#aiModalContext').textContent = `${state.sys || 'System'} · ${gathered.payload.totalSquares} squares`;
+    $('#aiModalTextarea').value = gathered.textareaValue || '';
+    $('#aiModalStatus').textContent = 'Edit manually or click Generate for AI suggestions.';
+    $('#aiModal').classList.add('show');
+  }
+
+  function closeAiModal(){
+    aiModalState = null;
+    $('#aiModal').classList.remove('show');
+    $('#aiModalStatus').textContent = '';
+  }
+
+  async function runAiModal(){
+    if(!aiModalState) return;
+    const target = AI_TARGETS[aiModalState.targetKey];
+    if(!target) return;
+    setStatus('Requesting AI rewrite...');
+    $('#aiModalStatus').textContent = 'Generating with AI...';
+    try{
+      const payload = {
+        ...aiModalState.payload,
+        section: target.section,
+        systemName: state.sys,
+        notes: $('#scopeOverride').value.trim(),
+      };
+      const res = await fetch('/api/ai/rewrite', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if(!res.ok){
+        const text = await res.text();
+        throw new Error(text || 'Unable to reach AI service');
+      }
+      const data = await res.json();
+      aiModalState.result = data;
+      const value = data.list?.length ? data.list.join('\n') : (data.text || '');
+      if(value) $('#aiModalTextarea').value = value;
+      $('#aiModalStatus').textContent = 'AI suggestions ready. Review and click Apply.';
+      setStatus('AI suggestions ready.');
+    }catch(err){
+      console.error(err);
+      $('#aiModalStatus').textContent = err.message || 'AI request failed.';
+      setStatus(err.message || 'Unable to reach AI service.', true);
+    }
+  }
+
+  function applyAiModal(){
+    if(!aiModalState) return;
+    const target = AI_TARGETS[aiModalState.targetKey];
+    if(!target) return;
+    const manualValue = $('#aiModalTextarea').value.trim();
+    const manualResult = target.manualConvert(manualValue);
+    const result = aiModalState.result || manualResult;
+    target.apply(result);
+    closeAiModal();
+    setStatus(`${target.label} updated.`);
+  }
+
+  // Add new area
+  function addArea(){
+    const nextId = state.areas.length ? state.areas[state.areas.length-1].id + 1 : 1;
+    const preset = getActivePreset();
+    state.areas.push({ id: nextId, name: `Area ${nextId}`, squares: 0, unitPrice: preset.unitPrice, include: true });
+    save(); renderAreas(); render();
+  }
+  // Remove area by id
+  function removeArea(id){
+    state.areas = state.areas.filter(a => a.id !== id);
+    save(); renderAreas(); render();
+  }
+  // Render areas in inputs
+  function renderAreas(){
+    const host = $('#areas');
+    host.innerHTML = '';
+    state.areas.forEach(area => {
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.style.marginBottom = '8px';
+      div.innerHTML = `
+        <div class="content">
+          <div class="row row-3">
+            <label>Area Name<input value="${area.name}" /></label>
+            <label>Squares<input type="number" step="0.01" min="0" value="${area.squares}" /></label>
+            <label>Unit Price ($/sq)<input type="number" step="1" min="0" value="${area.unitPrice}" /></label>
+          </div>
+          <div class="flex" style="justify-content:space-between; align-items:center; margin-top:8px">
+            <label class="flex" style="gap:4px"><input type="checkbox" ${area.include ? 'checked' : ''}/> Include</label>
+            ${state.areas.length > 1 ? '<button data-id="' + area.id + '">Remove</button>' : ''}
+          </div>
+        </div>`;
+      // Bind inputs
+      const inputs = div.querySelectorAll('input');
+      inputs[0].addEventListener('input', e=>{ area.name = e.target.value; save(); render(); });
+      inputs[1].addEventListener('input', e=>{ area.squares = parseFloat(e.target.value) || 0; save(); render(); });
+      inputs[2].addEventListener('input', e=>{ area.unitPrice = parseFloat(e.target.value) || 0; save(); render(); });
+      const chk = div.querySelector('input[type="checkbox"]');
+      chk.addEventListener('change', e=>{ area.include = e.target.checked; save(); render(); });
+      const btn = div.querySelector('button');
+      if(btn) btn.addEventListener('click', ()=> removeArea(area.id));
+      host.appendChild(div);
+    });
+  }
+
+  // Custom Products Management
+  function setCustomStatus(message, isError){
+    const el = $('#customProductStatus');
+    if(!el) return;
+    el.textContent = message || '';
+    el.style.color = isError ? '#b11226' : 'var(--muted)';
+  }
+
+  async function saveCustomProduct(){
+    const name = $('#customProdName').value.trim();
+    const price = parseFloat($('#customProdPrice').value) || 0;
+    const warranty = $('#customProdWarranty').value.trim();
+    const comps = $('#customProdComps').value.trim().split('\n').filter(x=>x.trim());
+    const scope = $('#customProdScope').value.trim().split('\n').filter(x=>x.trim());
+    if(!name){
+      alert('Please enter a product name');
+      return;
+    }
+    const body = {
+      name,
+      unitPrice: price,
+      warrantyText: warranty,
+      componentBullets: comps,
+      scopeBullets: scope,
+      isCustom: true,
+      isApproved: false,
+      ownerEmail: state.rep.email || undefined,
+      createdBy: state.rep.name || undefined
+    };
+    setCustomStatus('Saving custom product...');
+    try{
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if(!res.ok){
+        const text = await res.text();
+        throw new Error(text || 'Unable to save custom product.');
+      }
+      $('#customProdName').value = '';
+      $('#customProdPrice').value = '';
+      $('#customProdWarranty').value = '';
+      $('#customProdComps').value = '';
+      $('#customProdScope').value = '';
+      setCustomStatus('Custom product saved! Pending approval.');
+      await fetchProducts();
+    }catch(err){
+      console.error(err);
+      setCustomStatus(err.message || 'Unable to save custom product.', true);
+    }
+  }
+
+  async function deleteCustomProduct(id){
+    if(!id) return;
+    if(!confirm('Delete this custom product?')) return;
+    try{
+      const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      if(!res.ok){
+        const text = await res.text();
+        throw new Error(text || 'Unable to delete custom product.');
+      }
+      setCustomStatus('Custom product deleted.');
+      await fetchProducts();
+    }catch(err){
+      console.error(err);
+      setCustomStatus(err.message || 'Unable to delete custom product.', true);
+    }
+  }
+
+  function renderCustomProducts(){
+    const host = $('#customProductsList');
+    if(!host) return;
+    if(customProductList.length === 0){
+      host.innerHTML = '<div class="muted">No custom products saved yet.</div>';
+      return;
+    }
+    host.innerHTML = '<div style="font-weight:600; margin-bottom:8px">Saved Custom Products:</div>';
+    customProductList.forEach((prod) => {
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.style.marginBottom = '8px';
+      div.style.padding = '8px';
+      const status = prod.isApproved ? '' : '<div class="muted">Pending approval</div>';
+      const ownerLine = prod.ownerEmail ? `<div class=\"muted\">${prod.ownerEmail}</div>` : '';
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px">
+          <div>
+            <div style="font-weight:600">${prod.name}</div>
+            <div class="muted">${fmtUSD(prod.unitPrice)}/sq</div>
+            ${ownerLine}
+            ${status}
+          </div>
+          ${prod.productId ? '<button data-id=\"' + prod.productId + '\">Delete</button>' : ''}
+        </div>`;
+      const btn = div.querySelector('button');
+      if(btn){
+        btn.addEventListener('click', () => deleteCustomProduct(prod.productId));
+      }
+      host.appendChild(div);
+    });
+  }
+
+  function updateSystemSelect(){
+    const select = $('[data-bind="sys"]');
+    if(!select) return;
+    const currentVal = state.sys;
+    const options = Array.from(productMap.values()).sort((a,b) => a.name.localeCompare(b.name));
+    select.innerHTML = '<option value="">Select system...</option>';
+    options.forEach(opt => {
+      const option = document.createElement('option');
+      option.value = opt.name;
+      const label = opt.isCustom && !opt.isApproved ? `${opt.name} (Custom)` : opt.name;
+      option.textContent = label;
+      select.appendChild(option);
+    });
+    if(currentVal && productMap.has(currentVal)){
+      select.value = currentVal;
+    } else if(options.length){
+      select.value = options[0].name;
+      state.sys = options[0].name;
+      state.systemSlug = options[0].slug;
+    }
+  }
+
+  function getActivePreset(){
+    const sysName = state.sys;
+    if(productMap.has(sysName)){
+      return productMap.get(sysName);
+    }
+    return productMap.values().next().value || DEFAULT_PRODUCT_LIST[0];
+  }
+
+  // Calculate totals and lines
+  function calculate(){
+    const rows = state.areas.map(a => {
+      const sq = ceilSq(a.squares);
+      return { id:a.id, name:a.name, sq, include:a.include, line: a.include ? sq * (a.unitPrice || 0) : 0 };
+    });
+    const totalSq = rows.filter(r=>r.include).reduce((s,r)=> s + r.sq, 0);
+    const areaSubtotal = rows.filter(r=>r.include).reduce((s,r)=> s + r.line, 0);
+    // Deck cost
+    const extraSheets = Math.max(0, ceilSq(state.deck.estSheets) - ceilSq(state.deck.freeSheets));
+    const deckCost = state.deck.include ? extraSheets * (state.deck.sheetPrice || 0) : 0;
+    const subtotal = areaSubtotal + deckCost;
+    const taxAmt = subtotal * ((parseFloat(state.tax) || 0)/100);
+    const grand = subtotal + taxAmt;
+    return { rows, totalSq, areaSubtotal, deckCost, subtotal, taxAmt, grand };
+  }
+
+  // Render preview
+  function render(){
+    const data = calculate();
+    // Fill header and contact
+    $('#pCoName').textContent = state.co.name || '';
+    $('#pCoAddr').textContent = state.co.address || '';
+    $('#pCoPhone').textContent = state.co.phone || '';
+    $('#pCoUrl').textContent = state.co.url || '';
+    $('#pDate').textContent = state.qdate || '';
+    $('#pRepName').textContent = state.rep.name || '';
+    $('#pRepPhone').textContent = state.rep.phone || '';
+    $('#pRepEmail').textContent = state.rep.email || '';
+    $('#pCustName').textContent = state.cust.name || '';
+    $('#pCustAddr').textContent = state.cust.address || '';
+    $('#pCustEmail').textContent = state.cust.email || '';
+    $('#pCustPhone').textContent = state.cust.phone || '';
+    $('#pJob').textContent = state.job ? 'Job: ' + state.job : '';
+
+    // Areas table
+    const tbody = $('#pAreaRows');
+    tbody.innerHTML = '';
+    data.rows.filter(r=>r.include).forEach(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${r.name}</td><td style="text-align:right">${r.sq}</td><td style="text-align:right">${fmtUSD(r.line)}</td>`;
+      tbody.appendChild(tr);
+    });
+
+    const preset = getActivePreset();
+    const templateCtx = getTemplateContext(data, preset);
+    const scopeIntroText = getScopeIntroText(preset, templateCtx);
+    $('#pScopeIntro').textContent = scopeIntroText;
+    const scopeLines = getScopeLines(preset, templateCtx);
+    const list = $('#pScopeList');
+    list.innerHTML = '<ul style="margin:0; padding-left:20px;">' +
+      scopeLines.map(line => `<li>${line}</li>`).join('') +
+      '</ul>';
+    // Project notes
+    const notes = $('#scopeOverride').value.trim();
+    if(notes){
+      $('#pNotesContainer').style.display = 'block';
+      if(!state.scopeNotes) state.scopeNotes = notes;
+      $('#pScopeNotes').textContent = state.scopeNotes;
+    } else {
+      $('#pNotesContainer').style.display = 'none';
+      $('#pScopeNotes').textContent = '';
+    }
+    // Components list
+    const componentLines = getComponentLines(preset, templateCtx);
+    const cl = $('#pCompsList');
+    cl.innerHTML = '<ul style="margin:0; padding-left:20px;">' +
+      componentLines.map(line => `<li>${line}</li>`).join('') +
+      '</ul>';
+    // Warranties
+    const warranty = state.warrantyOverride && state.warrantyOverride.trim() ? state.warrantyOverride : (preset.warranty || 'As specified');
+    $('#pWarrantyLine').textContent = warranty;
+    // Disclaimer
+    if(state.showDisclaimer){
+      $('#pDisclaimerContainer').style.display = 'block';
+      $('#pDisclaimer').textContent = state.disclaimerText;
+    } else {
+      $('#pDisclaimerContainer').style.display = 'none';
+    }
+    // Pricing summary
+    const pricing = [];
+    data.rows.filter(r=>r.include).forEach(r => {
+      pricing.push(`${r.name} (${r.sq} sq): ${fmtUSD(r.line)}`);
+    });
+    if(state.deck.include) pricing.push(`Decking: +${fmtUSD(data.deckCost)}`);
+    pricing.push(`Subtotal before tax: ${fmtUSD(data.subtotal)}`);
+    if(state.tax) pricing.push(`Sales tax (${state.tax}%): ${fmtUSD(data.taxAmt)}`);
+    pricing.push(`TOTAL: ${fmtUSD(data.grand)}`);
+    if(!state.pricingText) {
+      state.pricingText = pricing.join('\n');
+    }
+    $('#pPricing').innerHTML = state.pricingText.split('\n').filter(line => line.trim()).map(line => `<div>${line}</div>`).join('');
+    // Alt plywood
+    if(state.showAltPly){
+      $('#pAltPlyContainer').style.display = 'block';
+      const altPlyDefault = `If customer purchases plywood materials directly, labor to install plywood is ${fmtUSD(25)} per square. Estimated labor-only: ${fmtUSD(25 * data.totalSq)} (based on ${data.totalSq} squares).`;
+      if(!state.altPlyText) {
+        state.altPlyText = altPlyDefault;
+      }
+      $('#pAltPlyLine').textContent = state.altPlyText;
+    } else {
+      $('#pAltPlyContainer').style.display = 'none';
+    }
+    // Totals
+    $('#pTotalSq').textContent = data.totalSq;
+    $('#pSubtotal').textContent = fmtUSD(data.subtotal);
+    $('#pGrand').textContent = fmtUSD(data.grand);
+    // Raw quote text
+    $('#quoteBox').value = buildQuoteText(data);
+  }
+
+  // Build raw quote text
+  function buildQuoteText(data){
+    const preset = getActivePreset();
+    const templateCtx = getTemplateContext(data, preset);
+    const scopeIntro = getScopeIntroText(preset, templateCtx);
+    const scopeLines = getScopeLines(preset, templateCtx);
+    const componentLines = getComponentLines(preset, templateCtx);
+    const lines = [];
+    lines.push(state.co.name);
+    lines.push(state.co.address);
+    lines.push('Phone: ' + (state.co.phone || ''));
+    lines.push('');
+    lines.push('Company Representative: ' + (state.rep.name || ''));
+    if(state.rep.phone) lines.push('Phone: ' + state.rep.phone);
+    if(state.rep.email) lines.push(state.rep.email);
+    lines.push('');
+    lines.push(state.qdate);
+    lines.push('Customer Information');
+    lines.push(state.cust.name || '');
+    if(state.cust.address) lines.push(state.cust.address);
+    if(state.cust.phone) lines.push(state.cust.phone);
+    if(state.cust.email) lines.push(state.cust.email);
+    if(state.job){ lines.push(''); lines.push('Job: ' + state.job); }
+    lines.push('');
+    lines.push('SYSTEM: ' + state.sys.toUpperCase());
+    lines.push('');
+    lines.push('AREAS AND QUANTITIES (squares rounded up)');
+    data.rows.filter(r=>r.include).forEach(r => lines.push(`${r.name}: ${r.sq} squares = ${fmtUSD(r.line)}`));
+    lines.push('');
+    lines.push('INSTALLATION SCOPE');
+    lines.push('• ' + scopeIntro);
+    scopeLines.forEach(b => lines.push('• ' + b));
+    const notes = $('#scopeOverride').value.trim();
+    if(notes){ lines.push(''); lines.push('PROJECT-SPECIFIC NOTES'); lines.push(notes); }
+    lines.push('');
+    lines.push('SYSTEM COMPONENTS');
+    componentLines.forEach((c,i) => lines.push(String.fromCharCode(65+i) + ') ' + c));
+    lines.push('');
+    lines.push('WARRANTIES');
+    lines.push('• Lifetime workmanship warranty – Zuppardo\'s Renovations LLC');
+    const warranty = state.warrantyOverride && state.warrantyOverride.trim() ? state.warrantyOverride : ((preset && preset.warranty) || 'As specified');
+    lines.push('• ' + warranty);
+    if(state.showDisclaimer){
+      lines.push('');
+      lines.push('IMPORTANT NOTICE');
+      lines.push(state.disclaimerText);
+    }
+    lines.push('');
+    lines.push('PRICING SUMMARY');
+    data.rows.filter(r=>r.include).forEach(r => lines.push(`${r.name} (${r.sq} squares): ${fmtUSD(r.line)}`));
+    if(state.deck.include) lines.push('Decking: +' + fmtUSD(data.deckCost));
+    lines.push('SUBTOTAL BEFORE TAX: ' + fmtUSD(data.subtotal));
+    if(state.tax) lines.push('Sales tax (' + state.tax + '%): ' + fmtUSD(data.taxAmt));
+    lines.push('TOTAL: ' + fmtUSD(data.grand));
+    if(state.showAltPly){
+      lines.push('');
+      lines.push('OPTION – CUSTOMER-SUPPLIED PLYWOOD (LABOR-ONLY)');
+      lines.push('If customer purchases plywood materials directly, labor to install plywood is ' + fmtUSD(25) + ' per square. Estimated labor-only: ' + fmtUSD(25*data.totalSq) + ' (based on ' + data.totalSq + ' squares).');
+    }
+    lines.push('');
+    lines.push('Company Authorized Signature __________________    Date ______');
+    lines.push('Customer Signature ____________________________    Date ______');
+    return lines.join('\n');
+  }
+
+  // Render presets or update unit prices when system or applyPreset changes
+  function updatePreset(){
+    const preset = getActivePreset();
+    state.systemSlug = (preset && preset.slug) ? preset.slug : slugify(state.sys || '');
+    if(!state.applyPreset || !preset) {
+      save();
+      render();
+      return;
+    }
+    state.areas = state.areas.map(a => Object.assign({}, a, { unitPrice: preset.unitPrice }));
+    save(); renderAreas(); render();
+  }
+
+  function syncBoundInputs(){
+    $$('[data-bind]').forEach(el => {
+      const path = el.getAttribute('data-bind');
+      let val = path.split('.').reduce((o,k)=> o ? o[k] : undefined, state);
+      if(el.type === 'checkbox') el.checked = !!val;
+      else el.value = val ?? '';
+    });
+  }
+
+  // Bind generic inputs
+  function bindInputs(){
+    // Data-bind inputs
+    $$('[data-bind]').forEach(el => {
+      const path = el.getAttribute('data-bind');
+      // Event listener - use 'input' event for immediate updates
+      el.addEventListener('input', e => {
+        const newVal = (el.type === 'checkbox') ? el.checked : (el.type === 'number' ? parseFloat(el.value||0) : el.value);
+        const keys = path.split('.');
+        let obj = state;
+        for(let i=0; i<keys.length-1; i++){ obj = obj[keys[i]]; }
+        obj[keys[keys.length-1]] = newVal;
+        save();
+        if(path === 'sys' || path === 'applyPreset') updatePreset();
+        render(); // Always render to update preview
+      });
+    });
+    syncBoundInputs();
+    // Deck include toggle
+    $('[data-bind="deck.include"]').addEventListener('change', e => {
+      $('#deckRow').style.display = e.target.checked ? 'grid' : 'none';
+    });
+    $('#deckRow').style.display = state.deck.include ? 'grid' : 'none';
+    // Scope override box
+    $('#scopeOverride').value = '';
+    $('#scopeOverride').addEventListener('input', () => render());
+    // Rep select
+    $('#repSelect').addEventListener('change', e => {
+      const repId = e.target.value;
+      state.repId = repId;
+      const rep = repOptions.find(r => r.id === repId);
+      if(rep){
+        state.rep = { name: rep.name, phone: rep.phone || '', email: rep.email || '' };
+      }
+      syncBoundInputs();
+      save(); render();
+    });
+    // Quick paste
+    $('#pasteBtn').addEventListener('click', () => {
+      const data = parseContact($('#pasteBox').value);
+      state.cust.name = data.name || state.cust.name;
+      state.cust.email = data.email || state.cust.email;
+      state.cust.phone = data.phone || state.cust.phone;
+      state.cust.address = data.address || state.cust.address;
+      syncBoundInputs();
+      save(); render();
+    });
+  }
+
+  // Inline editing
+  let editMode = false;
+  function toggleEdit(){
+    editMode = !editMode;
+    const preview = $('#preview');
+    if(editMode){
+      $('#editToggle').textContent = 'Disable Edit Preview';
+      preview.classList.add('editing');
+      $$('[data-edit]').forEach(el => {
+        el.setAttribute('contenteditable','true');
+        el.addEventListener('blur', handleEditBlur);
+      });
+    } else {
+      $('#editToggle').textContent = 'Enable Edit Preview';
+      preview.classList.remove('editing');
+      $$('[data-edit]').forEach(el => {
+        el.removeAttribute('contenteditable');
+        el.removeEventListener('blur', handleEditBlur);
+      });
+    }
+  }
+  function handleEditBlur(e){
+    const key = e.target.getAttribute('data-edit');
+    if(!key) return;
+    const val = e.target.innerText.trim();
+    if(key === 'co.name') state.co.name = val;
+    else if(key === 'co.address') state.co.address = val;
+    else if(key === 'co.phone') state.co.phone = val;
+    else if(key === 'co.url') state.co.url = val;
+    else if(key === 'qdate') state.qdate = val;
+    else if(key === 'rep.name') state.rep.name = val;
+    else if(key === 'rep.phone') state.rep.phone = val;
+    else if(key === 'rep.email') state.rep.email = val;
+    else if(key === 'cust.name') state.cust.name = val;
+    else if(key === 'cust.address') state.cust.address = val;
+    else if(key === 'cust.phone') state.cust.phone = val;
+    else if(key === 'cust.email') state.cust.email = val;
+    else if(key === 'job') state.job = val.startsWith('Job: ') ? val.slice(5).trim() : val;
+    else if(key === 'scopeIntroOverride') state.scopeIntroOverride = val;
+    else if(key === 'warrantyOverride') state.warrantyOverride = val;
+    else if(key === 'componentsText') {
+      state.componentsText = val;
+      state.componentsOverride = val ? val.split('\n').filter(line => line.trim()).map(line => line.trim()) : null;
+    }
+    else if(key === 'scopeListText') {
+      state.scopeListText = val;
+    }
+    else if(key === 'scopeNotes') {
+      state.scopeNotes = val;
+    }
+    else if(key === 'pricingText') {
+      state.pricingText = val;
+    }
+    else if(key === 'altPlyText') {
+      state.altPlyText = val;
+    }
+    else if(key === 'disclaimerText') {
+      state.disclaimerText = val;
+    }
+    // Save and re-render
+    save(); render();
+  }
+
+  // Mobile quote toggle
+  let mobileQuoteVisible = false;
+  function toggleMobileQuote(){
+    const previewSection = $('.grid > section:last-child');
+    const inputSection = $('.grid > section:first-child');
+    const toggleBtn = $('#mobileQuoteToggle');
+
+    mobileQuoteVisible = !mobileQuoteVisible;
+
+    if(mobileQuoteVisible){
+      previewSection.classList.add('show-mobile');
+      inputSection.style.display = 'none';
+      toggleBtn.textContent = 'Back to Form';
+      toggleBtn.classList.add('viewing');
+      window.scrollTo(0, 0);
+    } else {
+      previewSection.classList.remove('show-mobile');
+      inputSection.style.display = 'block';
+      toggleBtn.textContent = 'View Quote';
+      toggleBtn.classList.remove('viewing');
+    }
+  }
+
+  // Buttons actions
+  $('#mobileQuoteToggle').addEventListener('click', toggleMobileQuote);
+  $('#editToggle').addEventListener('click', toggleEdit);
+  $('#printBtn').addEventListener('click', () => {
+    window.print();
+  });
+  $('#copyBtn').addEventListener('click', () => {
+    navigator.clipboard.writeText($('#quoteBox').value).then(() => alert('Quote text copied.')).catch(() => alert('Unable to copy.')); });
+  $('#resetBtn').addEventListener('click', () => {
+    if(confirm('Reset all fields?')) {
+      localStorage.removeItem('zupp_quote_state');
+      location.reload();
+    }
+  });
+  // Add area
+  $('#addAreaBtn').addEventListener('click', addArea);
+  // Custom products
+  $('#saveCustomProduct').addEventListener('click', saveCustomProduct);
+  $('#saveQuoteBtn').addEventListener('click', () => saveQuote({ sync: false }));
+  $('#syncQuoteBtn').addEventListener('click', () => saveQuote({ sync: true }));
+  $('#lookupBtn').addEventListener('click', lookupCRMContact);
+  document.querySelectorAll('[data-ai-target]').forEach(btn => {
+    btn.addEventListener('click', (event) => {
+      event.preventDefault();
+      const targetKey = btn.getAttribute('data-ai-target');
+      openAiModal(targetKey);
+    });
+  });
+  $('#aiModalCancel').addEventListener('click', closeAiModal);
+  $('#aiModalGenerate').addEventListener('click', runAiModal);
+  $('#aiModalApply').addEventListener('click', applyAiModal);
+  // Expand/collapse all controls (left side)
+  // (Not required but possible to implement later)
+
+  async function init(){
+    bindInputs();
+    renderAreas();
+    renderCustomProducts();
+    updateSystemSelect();
+    render();
+    await Promise.all([fetchDefaults(), fetchProducts(), fetchBranding(), fetchReps()]);
+    await loadQuoteFromQuery();
+  }
+
+  init();
+})();
+</script>

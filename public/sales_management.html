@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sales Management</title>
+  <style>
+    :root {
+      --brand: #b11226;
+      --border: #e5e7eb;
+      --bg: #f8f9fb;
+      --ink: #111827;
+      --muted: #6b7280;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 2px solid var(--brand); background: #fff; position: sticky; top: 0; z-index: 10; }
+    .toolbar img { height: 32px; }
+    .toolbar .actions { display: flex; gap: 8px; }
+    .toolbar button { border: 1px solid var(--border); background: #fff; border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+    .layout { max-width: 1200px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; }
+    @media (min-width: 1000px) { .layout { grid-template-columns: 1.3fr 1fr; } }
+    .card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+    h2, h3 { margin-top: 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 8px; border-bottom: 1px solid var(--border); text-align: left; }
+    th { background: #f3f4f6; font-weight: 600; }
+    .table-wrapper { max-height: 360px; overflow-y: auto; }
+    label { display: block; font-size: 14px; font-weight: 600; margin-top: 10px; }
+    input, textarea, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; }
+    textarea { min-height: 80px; }
+    button.primary { background: var(--brand); color: #fff; border: none; border-radius: 8px; padding: 10px 16px; cursor: pointer; }
+    .muted { color: var(--muted); font-size: 13px; margin-top: 6px; }
+    .quote-link { color: var(--brand); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <div style="display:flex; align-items:center; gap:8px; font-weight:600;">
+      <img src="https://zuppardosrenovations.com/wp-content/uploads/2024/11/64ee5a67dae52024c3e16f6a_ZR-Official-Logo-2-p-500.png" alt="Zuppardo's Renovations" />
+      <span>Sales Management</span>
+    </div>
+    <div class="actions">
+      <button onclick="window.location.href='final_quote_builder.html'">Quote Builder</button>
+      <button onclick="window.location.href='catalog.html'">Catalog</button>
+    </div>
+  </div>
+  <div class="layout">
+    <section class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        <h2>Sales Reps</h2>
+        <button class="primary" id="newRepBtn">New Rep</button>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="repRows"></tbody>
+        </table>
+      </div>
+      <form id="repForm" style="margin-top:16px;">
+        <h3 id="repFormTitle">Add Rep</h3>
+        <label>Name<input id="repName" required /></label>
+        <label>Phone<input id="repPhone" /></label>
+        <label>Email<input id="repEmail" type="email" /></label>
+        <label>Status
+          <select id="repActive">
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        </label>
+        <div style="margin-top:12px; display:flex; gap:8px;">
+          <button type="submit" class="primary">Save Rep</button>
+        </div>
+        <div id="repStatus" class="muted"></div>
+      </form>
+    </section>
+    <section class="card">
+      <h2>Rep Quotes</h2>
+      <label>Select Rep
+        <select id="quoteRepSelect">
+          <option value="">Choose rep…</option>
+        </select>
+      </label>
+      <div class="table-wrapper" style="margin-top:12px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Job</th>
+              <th>Total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="quoteRows">
+            <tr><td colspan="5" class="muted">Select a rep to view quotes.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <script>
+    (() => {
+      const qs = (sel) => document.querySelector(sel);
+      let reps = [];
+      let selectedId = null;
+
+      function setRepStatus(message, isError){
+        const el = qs('#repStatus');
+        el.textContent = message || '';
+        el.style.color = isError ? '#b11226' : 'var(--muted)';
+      }
+
+      const fmtUSD = (value) => Number(value || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+      const fmtDate = (value) => new Date(value).toLocaleDateString();
+
+      async function loadReps(){
+        try{
+          const res = await fetch('/api/sales-reps');
+          const data = await res.json();
+          reps = Array.isArray(data) ? data : [];
+          renderRepTable();
+          populateRepSelect();
+        }catch(err){ console.error(err); }
+      }
+
+      function renderRepTable(){
+        const rows = qs('#repRows');
+        if(reps.length === 0){
+          rows.innerHTML = '<tr><td colspan="5" class="muted">No reps yet.</td></tr>';
+          return;
+        }
+        rows.innerHTML = '';
+        reps.forEach(rep => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${rep.name}</td>
+            <td>${rep.phone || '-'}</td>
+            <td>${rep.email || '-'}</td>
+            <td>${rep.active ? 'Active' : 'Inactive'}</td>
+            <td><button data-id="${rep.id}" class="primary" style="padding:4px 10px;">Edit</button></td>`;
+          tr.querySelector('button').addEventListener('click', () => editRep(rep.id));
+          rows.appendChild(tr);
+        });
+      }
+
+      function populateRepSelect(){
+        const select = qs('#quoteRepSelect');
+        const current = select.value;
+        select.innerHTML = '<option value="">Choose rep…</option>';
+        reps.forEach(rep => {
+          const opt = document.createElement('option');
+          opt.value = rep.id;
+          opt.textContent = rep.name;
+          select.appendChild(opt);
+        });
+        if(current && reps.some(r => r.id === current)){
+          select.value = current;
+        }
+      }
+
+      function editRep(id){
+        const rep = reps.find(r => r.id === id);
+        selectedId = id;
+        qs('#repFormTitle').textContent = rep ? `Edit: ${rep.name}` : 'Add Rep';
+        qs('#repName').value = rep?.name || '';
+        qs('#repPhone').value = rep?.phone || '';
+        qs('#repEmail').value = rep?.email || '';
+        qs('#repActive').value = rep?.active === false ? 'false' : 'true';
+        setRepStatus('');
+      }
+
+      qs('#repForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const payload = {
+          name: qs('#repName').value.trim(),
+          phone: qs('#repPhone').value.trim(),
+          email: qs('#repEmail').value.trim(),
+          active: qs('#repActive').value === 'true',
+        };
+        if(!payload.name){
+          setRepStatus('Name is required.', true);
+          return;
+        }
+        try{
+          const method = selectedId ? 'PUT' : 'POST';
+          const url = selectedId ? `/api/sales-reps/${selectedId}` : '/api/sales-reps';
+          const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if(!res.ok) throw new Error('Unable to save rep.');
+          setRepStatus('Sales rep saved.');
+          selectedId = null;
+          qs('#repForm').reset();
+          qs('#repFormTitle').textContent = 'Add Rep';
+          await loadReps();
+        }catch(err){
+          console.error(err);
+          setRepStatus(err.message || 'Unable to save rep.', true);
+        }
+      });
+
+      qs('#newRepBtn').addEventListener('click', () => {
+        selectedId = null;
+        qs('#repForm').reset();
+        qs('#repFormTitle').textContent = 'Add Rep';
+        setRepStatus('');
+      });
+
+      qs('#quoteRepSelect').addEventListener('change', async (event) => {
+        const repId = event.target.value;
+        if(!repId){
+          qs('#quoteRows').innerHTML = '<tr><td colspan="5" class="muted">Select a rep to view quotes.</td></tr>';
+          return;
+        }
+        try{
+          const res = await fetch(`/api/sales-reps/${repId}/quotes`);
+          const data = await res.json();
+          renderQuoteTable(data);
+        }catch(err){
+          console.error(err);
+        }
+      });
+
+      function renderQuoteTable(quotes){
+        const rows = qs('#quoteRows');
+        if(!quotes || quotes.length === 0){
+          rows.innerHTML = '<tr><td colspan="5" class="muted">No quotes yet.</td></tr>';
+          return;
+        }
+        rows.innerHTML = '';
+        quotes.forEach(q => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${fmtDate(q.createdAt)}</td>
+            <td>${q.customerName || '-'}</td>
+            <td>${q.jobName || '-'}</td>
+            <td>${fmtUSD(q.total)}</td>
+            <td><a class="quote-link" href="final_quote_builder.html?quote=${q.id}" target="_blank" rel="noreferrer">Open</a></td>`;
+          rows.appendChild(tr);
+        });
+      }
+
+      loadReps();
+    })();
+  </script>
+</body>
+</html>
