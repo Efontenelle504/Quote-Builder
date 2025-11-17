@@ -457,22 +457,18 @@ async function upsertDefaults() {
 }
 
 async function upsertSalesReps() {
+  // Clear existing to avoid unique constraint collisions when reseeding
+  await prisma.salesRep.deleteMany({});
+  const seen = new Set<string>();
+  const deduped: { name: string; phone?: string; email: string; active: boolean }[] = [];
   for (const rep of salesReps) {
-    await prisma.salesRep.upsert({
-      where: { email: rep.email || `${slugify(rep.name)}@zuppardos.local` },
-      update: {
-        name: rep.name,
-        phone: rep.phone,
-        email: rep.email,
-        active: true,
-      },
-      create: {
-        name: rep.name,
-        phone: rep.phone,
-        email: rep.email,
-        active: true,
-      },
-    });
+    const email = (rep.email && rep.email.trim().toLowerCase()) ? rep.email.trim().toLowerCase() : `${slugify(rep.name)}@zuppardos.local`;
+    if (seen.has(email)) continue;
+    seen.add(email);
+    deduped.push({ name: rep.name, phone: rep.phone, email, active: true });
+  }
+  if(deduped.length){
+    await prisma.salesRep.createMany({ data: deduped, skipDuplicates: true });
   }
 }
 
