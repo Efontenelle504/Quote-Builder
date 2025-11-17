@@ -36,7 +36,20 @@ const salesReps = [
   { name: "Terry Garwood", phone: "+15042810591", email: "tgarwood07@gmail.com" }
 ];
 
-const products = [
+const products: Array<{
+  name: string;
+  category?: string;
+  description?: string;
+  unitPrice?: number;
+  warrantyText?: string;
+  scopeIntro?: string;
+  scopeBullets?: string[];
+  componentBullets?: string[];
+  tags: string[];
+  imageUrl?: string;
+  isCustom?: boolean;
+  isApproved?: boolean;
+}> = [
   {
     name: "Fortified Asphalt Roof (GAF or Owens Corning)",
     category: "Roofing",
