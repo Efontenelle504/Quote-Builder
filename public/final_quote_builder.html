@@ -695,6 +695,7 @@
     const scopeLines = parseLines(state.scopeListText || '');
     const componentsLines = parseLines(state.componentsText || '');
     const pricingLines = parseLines(state.pricingText || '');
+    const pricingOverride = pricingLines.length ? pricingLines : undefined;
     return {
       company: state.co,
       rep: state.rep,
@@ -715,7 +716,7 @@
       scopeBulletsOverride: scopeLines.length ? scopeLines : undefined,
       componentsOverride: componentsLines.length ? componentsLines : undefined,
       warrantyOverride: state.warrantyOverride || undefined,
-      pricingOverride: pricingLines.length ? pricingLines : undefined,
+      pricingOverride,
       altPlyText: state.altPlyText || undefined,
       financing: state.fin,
       syncOnSave: sync
@@ -1365,24 +1366,23 @@
       $('#pDisclaimerContainer').style.display = 'none';
     }
     // Pricing summary
-    const pricing = [];
+    const computedPricing = [];
     data.rows.filter(r=>r.include).forEach(r => {
-      pricing.push(`${r.name} (${r.sq} sq): ${fmtUSD(r.line)}`);
+      computedPricing.push(`${r.name} (${r.sq} sq): ${fmtUSD(r.line)}`);
     });
-    if(state.deck.include) pricing.push(`Decking: +${fmtUSD(data.deckCost)}`);
-    pricing.push(`Subtotal before tax: ${fmtUSD(data.subtotal)}`);
-    if(state.tax) pricing.push(`Sales tax (${state.tax}%): ${fmtUSD(data.taxAmt)}`);
-    pricing.push(`TOTAL: ${fmtUSD(data.grand)}`);
+    if(state.deck.include) computedPricing.push(`Decking: +${fmtUSD(data.deckCost)}`);
+    computedPricing.push(`Subtotal before tax: ${fmtUSD(data.subtotal)}`);
+    if(state.tax) computedPricing.push(`Sales tax (${state.tax}%): ${fmtUSD(data.taxAmt)}`);
+    computedPricing.push(`TOTAL: ${fmtUSD(data.grand)}`);
     if(showMonthly){
       const monthlyLine = state.fin.showDetails
         ? `Estimated monthly payment: ${fmtUSD(monthlyPayment)} (Assumes ${state.fin.years || 0} years @ ${(Number(state.fin.apr) || 0).toFixed(2)}% APR)`
         : `Estimated monthly payment: ${fmtUSD(monthlyPayment)}`;
-      pricing.push(monthlyLine);
+      computedPricing.push(monthlyLine);
     }
-    if(!state.pricingText) {
-      state.pricingText = pricing.join('\n');
-    }
-    $('#pPricing').innerHTML = state.pricingText.split('\n').filter(line => line.trim()).map(line => `<div>${line}</div>`).join('');
+    const pricingLines = (state.pricingText || '').split('\n').map(x => x.trim()).filter(Boolean);
+    const linesToRender = pricingLines.length ? pricingLines : computedPricing;
+    $('#pPricing').innerHTML = linesToRender.map(line => `<div>${line}</div>`).join('');
     // Alt plywood
     if(state.showAltPly){
       $('#pAltPlyContainer').style.display = 'block';
@@ -1494,6 +1494,7 @@
   function updatePreset(){
     const preset = getActivePreset();
     state.systemSlug = (preset && preset.slug) ? preset.slug : slugify(state.sys || '');
+    state.pricingText = '';
     if(!state.applyPreset || !preset) {
       save();
       render();
