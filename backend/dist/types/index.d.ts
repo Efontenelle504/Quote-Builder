@@ -11,6 +11,12 @@ export interface DeckPayload {
     sheetPrice?: number;
     freeSheets?: number;
 }
+export interface FinancingPayload {
+    years?: number;
+    apr?: number;
+    showOnQuote?: boolean;
+    showDetails?: boolean;
+}
 export interface QuoteRequestPayload {
     company?: {
         name?: string;
@@ -48,6 +54,7 @@ export interface QuoteRequestPayload {
     pricingOverride?: string[];
     altPlyText?: string;
     scopeNotes?: string;
+    financing?: FinancingPayload;
     syncOnSave?: boolean;
 }
 export interface QuoteCalculations {

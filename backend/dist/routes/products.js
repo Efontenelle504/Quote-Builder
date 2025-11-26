@@ -13,7 +13,11 @@ const productSchema = zod_1.z.object({
     scopeBullets: zod_1.z.array(zod_1.z.string()).optional(),
     componentBullets: zod_1.z.array(zod_1.z.string()).optional(),
     tags: zod_1.z.array(zod_1.z.string()).optional(),
-    imageUrl: zod_1.z.string().url().optional(),
+    imageUrl: zod_1.z.string().optional().refine((val) => {
+        if (!val)
+            return true;
+        return /^https?:\/\//i.test(val) || val.startsWith("data:");
+    }, { message: "Invalid image URL" }),
     isCustom: zod_1.z.boolean().optional(),
     ownerEmail: zod_1.z.string().email().optional(),
     createdBy: zod_1.z.string().optional(),

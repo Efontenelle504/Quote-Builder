@@ -18,6 +18,7 @@ async function createQuotePdf(payload) {
     const fileName = `${safeName}-${timestamp}.pdf`;
     const filePath = (0, files_1.storagePath)(fileName);
     await new Promise((resolve, reject) => {
+        var _a;
         const doc = new pdfkit_1.default({ margin: 40, size: "LETTER" });
         const stream = fs_1.default.createWriteStream(filePath);
         stream.on("finish", resolve);
@@ -103,6 +104,15 @@ async function createQuotePdf(payload) {
             .fontSize(12)
             .fillColor("#b11226")
             .text(`Grand Total: ${(0, calculations_1.usd)(payload.grandTotal)}`);
+        if (((_a = payload.financing) === null || _a === void 0 ? void 0 : _a.showOnQuote) && payload.financing.monthlyPayment) {
+            const detail = payload.financing.showDetails && (payload.financing.years || payload.financing.apr)
+                ? ` (Assumes ${payload.financing.years || 0} years @ ${Number(payload.financing.apr || 0).toFixed(2)}% APR)`
+                : "";
+            doc
+                .fontSize(11)
+                .fillColor("#000")
+                .text(`Estimated Monthly Payment: ${(0, calculations_1.usd)(payload.financing.monthlyPayment)}${detail}`);
+        }
         const addList = (title, items) => {
             if (!items.length)
                 return;

@@ -22,6 +22,13 @@ const deckSchema = z.object({
   freeSheets: z.number().optional(),
 });
 
+const financingSchema = z.object({
+  years: z.number().positive().optional(),
+  apr: z.number().nonnegative().optional(),
+  showOnQuote: z.boolean().optional(),
+  showDetails: z.boolean().optional(),
+});
+
 const quoteSchema = z.object({
   company: z
     .object({
@@ -63,6 +70,7 @@ const quoteSchema = z.object({
   warrantyOverride: z.string().optional(),
   pricingOverride: z.array(z.string()).optional(),
   altPlyText: z.string().optional(),
+  financing: financingSchema.optional(),
   syncOnSave: z.boolean().optional(),
 });
 

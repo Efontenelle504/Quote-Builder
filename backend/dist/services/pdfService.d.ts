@@ -40,6 +40,13 @@ export interface QuotePdfPayload {
     altPlyText?: string;
     disclaimerText?: string;
     showDisclaimer: boolean;
+    financing?: {
+        monthlyPayment?: number;
+        years?: number;
+        apr?: number;
+        showDetails?: boolean;
+        showOnQuote?: boolean;
+    };
 }
 export interface PdfResult {
     fileName: string;

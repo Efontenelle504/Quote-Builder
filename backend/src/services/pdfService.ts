@@ -45,6 +45,13 @@ export interface QuotePdfPayload {
   altPlyText?: string;
   disclaimerText?: string;
   showDisclaimer: boolean;
+  financing?: {
+    monthlyPayment?: number;
+    years?: number;
+    apr?: number;
+    showDetails?: boolean;
+    showOnQuote?: boolean;
+  };
 }
 
 export interface PdfResult {
@@ -155,6 +162,16 @@ export async function createQuotePdf(payload: QuotePdfPayload): Promise<PdfResul
       .fontSize(12)
       .fillColor("#b11226")
       .text(`Grand Total: ${usd(payload.grandTotal)}`);
+    if (payload.financing?.showOnQuote && payload.financing.monthlyPayment) {
+      const detail =
+        payload.financing.showDetails && (payload.financing.years || payload.financing.apr)
+          ? ` (Assumes ${payload.financing.years || 0} years @ ${Number(payload.financing.apr || 0).toFixed(2)}% APR)`
+          : "";
+      doc
+        .fontSize(11)
+        .fillColor("#000")
+        .text(`Estimated Monthly Payment: ${usd(payload.financing.monthlyPayment)}${detail}`);
+    }
 
     const addList = (title: string, items: string[]) => {
       if (!items.length) return;

@@ -13,7 +13,10 @@ const productSchema = z.object({
   scopeBullets: z.array(z.string()).optional(),
   componentBullets: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
-  imageUrl: z.string().url().optional(),
+  imageUrl: z.string().optional().refine((val) => {
+    if (!val) return true;
+    return /^https?:\/\//i.test(val) || val.startsWith("data:");
+  }, { message: "Invalid image URL" }),
   isCustom: z.boolean().optional(),
   ownerEmail: z.string().email().optional(),
   createdBy: z.string().optional(),

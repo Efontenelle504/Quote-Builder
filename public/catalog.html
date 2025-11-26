@@ -89,6 +89,11 @@
         <label>Name<input id="prodName" required /></label>
         <label>Description<textarea id="prodDescription"></textarea></label>
         <label>Unit Price ($/sq)<input id="prodPrice" type="number" min="0" step="1" /></label>
+        <label>Badge / Image URL<input id="prodImageUrl" placeholder="https://... (or will be filled from upload)" /></label>
+        <label>Upload Badge (diamond/logo for chart)
+          <input id="prodImageFile" type="file" accept="image/*" />
+          <div class="muted">Choose your system badge; we’ll read it to a data URL and store it with the product so it shows above comparison columns.</div>
+        </label>
         <label>Warranty<button type="button" class="ai-btn-inline" data-product-ai="product-warranty">AI Rewrite</button><textarea id="prodWarranty" placeholder="Warranty details"></textarea></label>
         <label>Scope Bullets (one per line)<button type="button" class="ai-btn-inline" data-product-ai="scope">AI Rewrite</button><textarea id="prodScope" placeholder="Bullet 1\nBullet 2"></textarea></label>
         <label>Components (one per line)<button type="button" class="ai-btn-inline" data-product-ai="components">AI Rewrite</button><textarea id="prodComponents" placeholder="Component 1\nComponent 2"></textarea></label>
@@ -180,6 +185,28 @@
         el.style.color = isError ? '#b11226' : 'var(--muted)';
       }
 
+      function setImageStatus(message, isError){
+        const el = qs('#productFormStatus');
+        el.textContent = message || '';
+        el.style.color = isError ? '#b11226' : 'var(--muted)';
+      }
+
+      function wireImageUpload(){
+        const fileInput = qs('#prodImageFile');
+        const urlInput = qs('#prodImageUrl');
+        fileInput.addEventListener('change', () => {
+          const file = fileInput.files?.[0];
+          if(!file){ return; }
+          const reader = new FileReader();
+          reader.onload = () => {
+            urlInput.value = reader.result || '';
+            setImageStatus('Badge loaded from file. It will save with the product.', false);
+          };
+          reader.onerror = () => setImageStatus('Unable to read image file.', true);
+          reader.readAsDataURL(file);
+        });
+      }
+
       function updateColorDisplays() {
         const primary = qs('#brandPrimary').value || '#b11226';
         const secondary = qs('#brandSecondary').value || '#0a0a0a';
@@ -236,7 +263,7 @@
 
       function renderTable(){
         if(products.length === 0){
-          productRows.innerHTML = '<tr><td colspan="5" class="muted">No products yet.</td></tr>';
+          productRows.innerHTML = '<tr><td colspan="6" class="muted">No products yet.</td></tr>';
           return;
         }
         productRows.innerHTML = '';
@@ -244,6 +271,7 @@
           const tr = document.createElement('tr');
           const status = prod.isApproved ? 'Approved' : 'Pending';
           tr.innerHTML = `
+            <td>${prod.imageUrl ? `<img src="${prod.imageUrl}" alt="badge" style="height:30px; width:auto;">` : '-'}</td>
             <td>${prod.name}</td>
             <td>${fmtUSD(prod.unitPrice)}</td>
             <td>${status}</td>
@@ -265,6 +293,7 @@
         qs('#prodScope').value = Array.isArray(prod?.scopeBullets) ? prod.scopeBullets.join('\n') : '';
         qs('#prodComponents').value = Array.isArray(prod?.componentBullets) ? prod.componentBullets.join('\n') : '';
         qs('#prodTags').value = Array.isArray(prod?.tags) ? prod.tags.join(', ') : '';
+        qs('#prodImageUrl').value = prod?.imageUrl || '';
         qs('#prodApproved').checked = !!prod?.isApproved;
         qs('#prodCustom').checked = !!prod?.isCustom;
         setFormStatus('');
@@ -277,6 +306,7 @@
           description: qs('#prodDescription').value.trim(),
           unitPrice: parseFloat(qs('#prodPrice').value) || 0,
           warrantyText: qs('#prodWarranty').value.trim(),
+          imageUrl: qs('#prodImageUrl').value.trim(),
           scopeBullets: qs('#prodScope').value.split('\n').map(x => x.trim()).filter(Boolean),
           componentBullets: qs('#prodComponents').value.split('\n').map(x => x.trim()).filter(Boolean),
           tags: qs('#prodTags').value.split(',').map(x => x.trim()).filter(Boolean),
@@ -394,13 +424,6 @@
       qs('#productAiGenerate').addEventListener('click', runProductAiModal);
       qs('#productAiApply').addEventListener('click', applyProductAiModal);
 
-      loadProducts();
-      loadDefaults();
-      loadBranding();
-    })();
-  </script>
-</body>
-</html>
       const productAiTargets = {
         scope: {
           label: 'Product Scope Bullets',
@@ -531,6 +554,11 @@
         target.apply(result);
         closeProductAiModal();
       }
+
+      wireImageUpload();
+      loadProducts();
+      loadDefaults();
+      loadBranding();
     })();
   </script>
 </body>

@@ -23,6 +23,12 @@ const deckSchema = zod_1.z.object({
     sheetPrice: zod_1.z.number().optional(),
     freeSheets: zod_1.z.number().optional(),
 });
+const financingSchema = zod_1.z.object({
+    years: zod_1.z.number().positive().optional(),
+    apr: zod_1.z.number().nonnegative().optional(),
+    showOnQuote: zod_1.z.boolean().optional(),
+    showDetails: zod_1.z.boolean().optional(),
+});
 const quoteSchema = zod_1.z.object({
     company: zod_1.z
         .object({
@@ -64,6 +70,7 @@ const quoteSchema = zod_1.z.object({
     warrantyOverride: zod_1.z.string().optional(),
     pricingOverride: zod_1.z.array(zod_1.z.string()).optional(),
     altPlyText: zod_1.z.string().optional(),
+    financing: financingSchema.optional(),
     syncOnSave: zod_1.z.boolean().optional(),
 });
 router.get("/", async (req, res) => {

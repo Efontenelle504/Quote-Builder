@@ -4,7 +4,7 @@ import path from "path";
 import { config } from "../lib/config";
 import { prisma } from "../lib/prisma";
 import { QuoteRequestPayload } from "../types";
-import { buildPricingLines, calculateTotals } from "./calculations";
+import { buildPricingLines, calculateMonthlyPayment, calculateTotals } from "./calculations";
 import { goHighLevelService } from "./gohighlevelService";
 import { productService } from "./productService";
 import { createQuotePdf, QuotePdfPayload } from "./pdfService";
@@ -63,6 +63,13 @@ function buildRawQuoteText(input: {
   disclaimer?: string;
   pricingLines: string[];
   altPlyText?: string;
+  financing?: {
+    showOnQuote?: boolean;
+    showDetails?: boolean;
+    monthlyPayment?: number;
+    years?: number;
+    apr?: number;
+  };
 }) {
   const lines: string[] = [];
   lines.push(input.company.name || "");
@@ -211,9 +218,31 @@ export const quoteService = {
       payload.warrantyOverride || product?.warrantyText || "Manufacturer warranty as specified.",
     ];
 
+    const financingInput = payload.financing || {};
+    const monthlyPayment = calculateMonthlyPayment(calcs.grandTotal, financingInput.years, financingInput.apr);
+    const financingInfo = {
+      years: financingInput.years,
+      apr: financingInput.apr,
+      showOnQuote: financingInput.showOnQuote,
+      showDetails: financingInput.showDetails,
+      monthlyPayment,
+    };
+
     const pricingLines = payload.pricingOverride?.length
       ? payload.pricingOverride
       : buildPricingLines(calcs, taxRate);
+    const hasMonthlyLine = pricingLines.some((line) =>
+      typeof line === "string" && /estimated monthly payment/i.test(line)
+    );
+    if (financingInfo.showOnQuote && financingInfo.monthlyPayment && !hasMonthlyLine) {
+      const monthlyLine = financingInfo.showDetails
+        ? `Estimated monthly payment: ${monthlyPayment.toLocaleString("en-US", {
+            style: "currency",
+            currency: "USD",
+          })} (Assumes ${financingInfo.years || 0} years @ ${Number(financingInfo.apr || 0).toFixed(2)}% APR)`
+        : `Estimated monthly payment: ${monthlyPayment.toLocaleString("en-US", { style: "currency", currency: "USD" })}`;
+      pricingLines.push(monthlyLine);
+    }
 
     const disclaimerText = payload.showDisclaimer
       ? payload.disclaimerText || defaultDisclaimer
@@ -241,6 +270,7 @@ export const quoteService = {
       deckCost: calcs.deckCost,
       notes: payload.notes,
       altPlyText: payload.altPlyText,
+      financing: financingInfo,
       disclaimerText,
       showDisclaimer: Boolean(payload.showDisclaimer),
     };
@@ -261,6 +291,7 @@ export const quoteService = {
       disclaimer: disclaimerText,
       pricingLines,
       altPlyText: payload.altPlyText,
+      financing: financingInfo,
     });
 
     const created = await prisma.quote.create({
@@ -286,7 +317,7 @@ export const quoteService = {
         disclaimerText,
         areas: pdfPayload.areas as Prisma.InputJsonValue,
         deckAllowance: (deck as unknown) as Prisma.InputJsonValue,
-        adders: { altPlyText: payload.altPlyText } as Prisma.InputJsonValue,
+        adders: { altPlyText: payload.altPlyText, financing: financingInfo } as Prisma.InputJsonValue,
         taxRate,
         subtotal: calcs.subtotal,
         total: calcs.grandTotal,

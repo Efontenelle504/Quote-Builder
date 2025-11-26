@@ -57,3 +57,16 @@ export function buildPricingLines(calcs: QuoteCalculations, taxRate?: number) {
   }
   return lines;
 }
+
+export function calculateMonthlyPayment(principal: number | undefined, years: number | undefined, apr: number | undefined) {
+  const p = Number(principal || 0);
+  const y = Number(years || 0);
+  if (!isFinite(p) || p <= 0 || !isFinite(y) || y <= 0) return 0;
+  const n = Math.max(1, Math.round(y * 12));
+  const monthlyRate = Number(apr || 0) / 100 / 12;
+  if (!isFinite(monthlyRate) || monthlyRate <= 0) {
+    return p / n;
+  }
+  const factor = Math.pow(1 + monthlyRate, n);
+  return (p * monthlyRate * factor) / (factor - 1);
+}

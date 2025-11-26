@@ -184,9 +184,28 @@ exports.quoteService = {
             WORKMANSHIP_WARRANTY,
             payload.warrantyOverride || (product === null || product === void 0 ? void 0 : product.warrantyText) || "Manufacturer warranty as specified.",
         ];
+        const financingInput = payload.financing || {};
+        const monthlyPayment = (0, calculations_1.calculateMonthlyPayment)(calcs.grandTotal, financingInput.years, financingInput.apr);
+        const financingInfo = {
+            years: financingInput.years,
+            apr: financingInput.apr,
+            showOnQuote: financingInput.showOnQuote,
+            showDetails: financingInput.showDetails,
+            monthlyPayment,
+        };
         const pricingLines = ((_c = payload.pricingOverride) === null || _c === void 0 ? void 0 : _c.length)
             ? payload.pricingOverride
             : (0, calculations_1.buildPricingLines)(calcs, taxRate);
+        const hasMonthlyLine = pricingLines.some((line) => typeof line === "string" && /estimated monthly payment/i.test(line));
+        if (financingInfo.showOnQuote && financingInfo.monthlyPayment && !hasMonthlyLine) {
+            const monthlyLine = financingInfo.showDetails
+                ? `Estimated monthly payment: ${monthlyPayment.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                })} (Assumes ${financingInfo.years || 0} years @ ${Number(financingInfo.apr || 0).toFixed(2)}% APR)`
+                : `Estimated monthly payment: ${monthlyPayment.toLocaleString("en-US", { style: "currency", currency: "USD" })}`;
+            pricingLines.push(monthlyLine);
+        }
         const disclaimerText = payload.showDisclaimer
             ? payload.disclaimerText || defaultDisclaimer
             : undefined;
@@ -212,6 +231,7 @@ exports.quoteService = {
             deckCost: calcs.deckCost,
             notes: payload.notes,
             altPlyText: payload.altPlyText,
+            financing: financingInfo,
             disclaimerText,
             showDisclaimer: Boolean(payload.showDisclaimer),
         };
@@ -231,6 +251,7 @@ exports.quoteService = {
             disclaimer: disclaimerText,
             pricingLines,
             altPlyText: payload.altPlyText,
+            financing: financingInfo,
         });
         const created = await prisma_1.prisma.quote.create({
             data: {
@@ -255,7 +276,7 @@ exports.quoteService = {
                 disclaimerText,
                 areas: pdfPayload.areas,
                 deckAllowance: deck,
-                adders: { altPlyText: payload.altPlyText },
+                adders: { altPlyText: payload.altPlyText, financing: financingInfo },
                 taxRate,
                 subtotal: calcs.subtotal,
                 total: calcs.grandTotal,

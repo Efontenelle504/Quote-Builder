@@ -263,6 +263,19 @@
           </div>
           <label class="flex" style="margin-top:8px"><input type="checkbox" data-bind="showAltPly" /> Show option: Customer-supplied plywood (labor-only @ $25/sq)</label>
           <label style="margin-top:8px">Sales Tax (%)<input type="number" data-bind="tax" min="0" /></label>
+          <div style="margin-top:12px; padding:10px; border:1px solid var(--border); border-radius:8px; background:#fafafa">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
+              <strong>Financing (estimate)</strong>
+              <span class="muted">For your reference; optional on quote</span>
+            </div>
+            <div class="row row-2" style="margin-top:8px">
+              <label>Term (years)<input type="number" data-bind="fin.years" min="1" step="1" /></label>
+              <label>Interest Rate (%)<input type="number" data-bind="fin.apr" min="0" step="0.01" /></label>
+            </div>
+            <label class="flex" style="margin-top:8px"><input type="checkbox" data-bind="fin.showOnQuote" /> Show estimated monthly payment on quote</label>
+            <label class="flex" style="margin-top:6px"><input type="checkbox" data-bind="fin.showDetails" /> Include term & APR text on quote</label>
+            <div class="muted" style="margin-top:8px">Estimated monthly (calc): <strong id="calcMonthly"></strong></div>
+          </div>
         </div>
       </details>
       <details class="card" open>
@@ -365,6 +378,7 @@
           <div>Squares (rounded): <strong id="pTotalSq"></strong></div>
           <div>Subtotal: <strong id="pSubtotal"></strong></div>
           <div>Total: <strong id="pGrand" class="grand"></strong></div>
+          <div id="pMonthlyRow" style="display:none;">Est. Monthly Payment: <strong id="pMonthly"></strong> <span id="pMonthlyDetails" class="muted"></span></div>
         </div>
       </div>
       <details class="card" style="margin-top:16px" open>
@@ -409,6 +423,18 @@
     });
   };
   const applyTemplateList = (list, ctx) => (Array.isArray(list) ? list : []).map(line => applyTemplateText(line, ctx));
+  const calcMonthlyPayment = (principal, years, apr) => {
+    const p = Number(principal || 0);
+    const y = Number(years || 0);
+    if(!isFinite(p) || p <= 0 || !isFinite(y) || y <= 0) return 0;
+    const n = Math.max(1, Math.round(y * 12));
+    const monthlyRate = Number(apr || 0) / 100 / 12;
+    if(!isFinite(monthlyRate) || monthlyRate <= 0){
+      return p / n;
+    }
+    const factor = Math.pow(1 + monthlyRate, n);
+    return (p * monthlyRate * factor) / (factor - 1);
+  };
 
   // Presets for unit price, warranty, components and scope
   const BASE_SCOPE_LINES = [
@@ -495,6 +521,7 @@
     deck:{ include:false, estSheets:0, sheetPrice:85, freeSheets:5 },
     showAltPly:true,
     tax:0,
+    fin:{ years:15, apr:9.99, showOnQuote:false, showDetails:false },
     scopeIntroOverride:'',
     warrantyOverride:'',
     componentsOverride:null,
@@ -690,6 +717,7 @@
       warrantyOverride: state.warrantyOverride || undefined,
       pricingOverride: pricingLines.length ? pricingLines : undefined,
       altPlyText: state.altPlyText || undefined,
+      financing: state.fin,
       syncOnSave: sync
     };
   }
@@ -1275,6 +1303,8 @@
   // Render preview
   function render(){
     const data = calculate();
+    const monthlyPayment = calcMonthlyPayment(data.grand, state.fin.years, state.fin.apr);
+    const showMonthly = state.fin.showOnQuote && monthlyPayment > 0;
     // Fill header and contact
     $('#pCoName').textContent = state.co.name || '';
     $('#pCoAddr').textContent = state.co.address || '';
@@ -1343,6 +1373,12 @@
     pricing.push(`Subtotal before tax: ${fmtUSD(data.subtotal)}`);
     if(state.tax) pricing.push(`Sales tax (${state.tax}%): ${fmtUSD(data.taxAmt)}`);
     pricing.push(`TOTAL: ${fmtUSD(data.grand)}`);
+    if(showMonthly){
+      const monthlyLine = state.fin.showDetails
+        ? `Estimated monthly payment: ${fmtUSD(monthlyPayment)} (Assumes ${state.fin.years || 0} years @ ${(Number(state.fin.apr) || 0).toFixed(2)}% APR)`
+        : `Estimated monthly payment: ${fmtUSD(monthlyPayment)}`;
+      pricing.push(monthlyLine);
+    }
     if(!state.pricingText) {
       state.pricingText = pricing.join('\n');
     }
@@ -1357,6 +1393,21 @@
       $('#pAltPlyLine').textContent = state.altPlyText;
     } else {
       $('#pAltPlyContainer').style.display = 'none';
+    }
+    // Financing (monthly payment)
+    $('#calcMonthly').textContent = fmtUSD(monthlyPayment || 0);
+    if(showMonthly){
+      $('#pMonthlyRow').style.display = 'block';
+      $('#pMonthly').textContent = fmtUSD(monthlyPayment);
+      const detailText = state.fin.showDetails
+        ? `(Assumes ${state.fin.years || 0} years @ ${(Number(state.fin.apr) || 0).toFixed(2)}% APR)`
+        : '';
+      const detailEl = $('#pMonthlyDetails');
+      detailEl.textContent = detailText;
+      detailEl.style.display = detailText ? 'inline' : 'none';
+    } else {
+      $('#pMonthlyRow').style.display = 'none';
+      $('#pMonthlyDetails').textContent = '';
     }
     // Totals
     $('#pTotalSq').textContent = data.totalSq;
@@ -1373,6 +1424,8 @@
     const scopeIntro = getScopeIntroText(preset, templateCtx);
     const scopeLines = getScopeLines(preset, templateCtx);
     const componentLines = getComponentLines(preset, templateCtx);
+    const monthlyPayment = calcMonthlyPayment(data.grand, state.fin.years, state.fin.apr);
+    const showMonthly = state.fin.showOnQuote && monthlyPayment > 0;
     const lines = [];
     lines.push(state.co.name);
     lines.push(state.co.address);
@@ -1420,6 +1473,12 @@
     lines.push('SUBTOTAL BEFORE TAX: ' + fmtUSD(data.subtotal));
     if(state.tax) lines.push('Sales tax (' + state.tax + '%): ' + fmtUSD(data.taxAmt));
     lines.push('TOTAL: ' + fmtUSD(data.grand));
+    if(showMonthly){
+      lines.push('ESTIMATED MONTHLY PAYMENT: ' + fmtUSD(monthlyPayment));
+      if(state.fin.showDetails){
+        lines.push(`Assumes ${state.fin.years || 0} years at ${(Number(state.fin.apr) || 0).toFixed(2)}% APR.`);
+      }
+    }
     if(state.showAltPly){
       lines.push('');
       lines.push('OPTION – CUSTOMER-SUPPLIED PLYWOOD (LABOR-ONLY)');
