@@ -26,6 +26,7 @@ export const config = {
     stageId: process.env.GOHIGHLEVEL_STAGE_ID || "",
     userId: process.env.GOHIGHLEVEL_USER_ID || "",
     baseUrl: process.env.GOHIGHLEVEL_API_BASE || "https://services.leadconnectorhq.com",
+    disableOpportunities: process.env.GOHIGHLEVEL_DISABLE_OPPORTUNITIES === "true",
   },
   openai: {
     apiKey: process.env.OPENAI_API_KEY || "",

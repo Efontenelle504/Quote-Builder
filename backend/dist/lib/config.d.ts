@@ -15,6 +15,7 @@ export declare const config: {
         stageId: string;
         userId: string;
         baseUrl: string;
+        disableOpportunities: boolean;
     };
     openai: {
         apiKey: string;

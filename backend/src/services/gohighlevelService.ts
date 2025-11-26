@@ -80,7 +80,12 @@ class GoHighLevelService {
   }
 
   async createOrUpdateOpportunity(ctx: SyncContext & { quote: Quote }) {
-    if (!this.enabled || !config.goHighLevel.pipelineId || !config.goHighLevel.stageId) {
+    if (
+      !this.enabled ||
+      config.goHighLevel.disableOpportunities ||
+      !config.goHighLevel.pipelineId ||
+      !config.goHighLevel.stageId
+    ) {
       return null;
     }
     const payload = {
@@ -163,11 +168,11 @@ class GoHighLevelService {
       address1: quote.customerAddress || undefined,
     });
     const contactId = contact?.id || contact?._id;
-    const opportunity = await this.createOrUpdateOpportunity({
-      quote,
-      contactId,
-      opportunityId: quote.goHighLevelOpportunityId || undefined,
-    });
+    const opportunity = await this.createOrUpdateOpportunity(
+      config.goHighLevel.disableOpportunities
+        ? { quote }
+        : { quote, contactId, opportunityId: quote.goHighLevelOpportunityId || undefined }
+    );
     if (contactId && pdfPath) {
       await this.uploadDocument(contactId, pdfPath);
     }
