@@ -9,6 +9,27 @@ const form_data_1 = __importDefault(require("form-data"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const config_1 = require("../lib/config");
+const isValidEmail = (email) => {
+    if (!email)
+        return false;
+    return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim());
+};
+const normalizePhone = (phone) => {
+    if (!phone)
+        return undefined;
+    const cleaned = phone.replace(/[^\d+]/g, "");
+    const digits = cleaned.startsWith("+") ? cleaned : cleaned.replace(/^0+/, "");
+    return digits.length >= 10 ? digits : undefined;
+};
+const unwrapErrorMessage = (err) => {
+    var _a, _b;
+    const e = err;
+    if ((_b = (_a = e === null || e === void 0 ? void 0 : e.response) === null || _a === void 0 ? void 0 : _a.data) === null || _b === void 0 ? void 0 : _b.message)
+        return e.response.data.message;
+    if (e === null || e === void 0 ? void 0 : e.message)
+        return e.message;
+    return "GoHighLevel request failed";
+};
 class GoHighLevelService {
     constructor() {
         this.apiPrefix = "/v2";
@@ -32,10 +53,14 @@ class GoHighLevelService {
             return null;
         try {
             const params = new URLSearchParams();
-            if (query.email)
-                params.append("email", query.email);
-            if (query.phone)
-                params.append("phone", query.phone);
+            const email = isValidEmail(query.email) ? query.email.trim() : undefined;
+            const phone = normalizePhone(query.phone);
+            if (email)
+                params.append("email", email);
+            if (phone)
+                params.append("phone", phone);
+            if (!params.toString())
+                return null;
             const { data } = await this.client.get(`${this.apiPrefix}/contacts/lookup?${params.toString()}`, {
                 headers: this.headers,
             });
@@ -50,14 +75,20 @@ class GoHighLevelService {
         if (!this.enabled)
             return null;
         try {
-            const { data } = await this.client.post(`${this.apiPrefix}/contacts/`, {
+            const email = isValidEmail(contact.email) ? contact.email.trim() : undefined;
+            const phone = normalizePhone(contact.phone);
+            const body = {
                 ...contact,
-            }, { headers: this.headers });
+                email,
+                phone,
+            };
+            const { data } = await this.client.post(`${this.apiPrefix}/contacts/`, body, { headers: this.headers });
             return (data === null || data === void 0 ? void 0 : data.contact) || data;
         }
         catch (err) {
-            console.warn("GoHighLevel upsertContact failed", err.message);
-            return null;
+            const message = unwrapErrorMessage(err);
+            console.warn("GoHighLevel upsertContact failed", message);
+            throw new Error(message);
         }
     }
     async createOrUpdateOpportunity(ctx) {
@@ -114,7 +145,8 @@ class GoHighLevelService {
             return data;
         }
         catch (err) {
-            console.warn("GoHighLevel upload failed", err.message);
+            const message = unwrapErrorMessage(err);
+            console.warn("GoHighLevel upload failed", message);
             return null;
         }
     }
@@ -148,7 +180,7 @@ class GoHighLevelService {
         const opportunity = await this.createOrUpdateOpportunity(config_1.config.goHighLevel.disableOpportunities
             ? { quote }
             : { quote, contactId, opportunityId: quote.goHighLevelOpportunityId || undefined });
-        if (contactId && pdfPath) {
+        if (contactId && pdfPath && config_1.config.goHighLevel.uploadPdf) {
             await this.uploadDocument(contactId, pdfPath);
         }
         if (contactId) {

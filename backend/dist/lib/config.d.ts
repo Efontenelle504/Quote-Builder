@@ -16,6 +16,7 @@ export declare const config: {
         userId: string;
         baseUrl: string;
         disableOpportunities: boolean;
+        uploadPdf: boolean;
     };
     openai: {
         apiKey: string;
