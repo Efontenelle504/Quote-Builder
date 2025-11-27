@@ -10,6 +10,8 @@ import salesRepsRouter from "./routes/salesReps";
 import aiRouter from "./routes/ai";
 import { config } from "./lib/config";
 import { ensureStorageDir } from "./lib/files";
+import authRouter from "./routes/auth";
+import { authMiddleware, secureHeaders } from "./middleware/auth";
 
 const app = express();
 
@@ -21,11 +23,16 @@ app.use(
   })
 );
 app.use(express.json({ limit: "5mb" }));
+app.use(secureHeaders);
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
+app.use("/api/auth", authRouter);
+
+// Protect all other /api routes
+app.use("/api", authMiddleware);
 app.use("/api/products", productsRouter);
 app.use("/api/quotes", quotesRouter);
 app.use("/api/crm", crmRouter);

@@ -34,4 +34,10 @@ export const config = {
     apiKey: process.env.OPENAI_API_KEY || "",
     model: process.env.OPENAI_MODEL || "gpt-5-nano",
   },
+  auth: {
+    userEmail: process.env.AUTH_USER_EMAIL || "admin@example.com",
+    userPassword: process.env.AUTH_USER_PASSWORD || "change-me",
+    jwtSecret: process.env.AUTH_JWT_SECRET || "change-this-secret",
+    tokenTtlMinutes: Number(process.env.AUTH_TOKEN_TTL_MINUTES || 120),
+  },
 };
