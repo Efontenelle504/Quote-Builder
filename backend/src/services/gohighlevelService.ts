@@ -58,6 +58,19 @@ class GoHighLevelService {
     };
   }
 
+  private async getContactById(id: string) {
+    if (!this.enabled) return null;
+    try {
+      const { data } = await this.client.get(`/contacts/${id}`, {
+        headers: this.headers,
+      });
+      return (data as any)?.contact || data;
+    } catch (err) {
+      console.warn("GoHighLevel getContactById failed", (err as Error).message);
+      return null;
+    }
+  }
+
   async findContact(query: { email?: string; phone?: string }) {
     if (!this.enabled) return null;
     try {
@@ -65,41 +78,26 @@ class GoHighLevelService {
       const phone = normalizePhone(query.phone);
       if (!email && !phone) return null;
 
-      // PIT search: use /contacts?query=... (works for email/phone)
-      const search = email || phone!;
-      const params = new URLSearchParams();
-      params.append("query", search);
+      const locationId = config.goHighLevel.locationId || undefined;
+      const body: Record<string, unknown> = {};
+      if (email) body.email = email;
+      if (phone) body.phone = phone;
+      if (locationId) body.locationId = locationId;
 
-      const { data } = await this.client.get(`/contacts?${params.toString()}`, {
+      // Attempt to create (or find) the contact.
+      const { data } = await this.client.post(`/contacts`, body, {
         headers: this.headers,
       });
-
-      const contacts = Array.isArray((data as any)?.contacts)
-        ? (data as any).contacts
-        : Array.isArray(data)
-        ? data
-        : [];
-
-      if (!contacts.length) return null;
-
-      if (email) {
-        const match = contacts.find(
-          (c: any) => c.email && c.email.toLowerCase() === email.toLowerCase()
-        );
-        if (match) return match;
-      }
-
-      if (phone) {
-        const last4 = phone.slice(-4);
-        const match = contacts.find((c: any) =>
-          String(c.phone || "").replace(/[^\d]/g, "").endsWith(last4)
-        );
-        if (match) return match;
-      }
-
-      return contacts[0] || null;
+      return (data as any)?.contact || data;
     } catch (err) {
-      console.warn("GoHighLevel lookup failed", (err as Error).message);
+      const e = err as any;
+      const res = e?.response;
+      const meta = res?.data?.meta;
+      // Location blocks duplicates: use the existing contactId.
+      if (res?.status === 400 && meta?.contactId) {
+        return this.getContactById(meta.contactId);
+      }
+      console.warn("GoHighLevel lookup failed", unwrapErrorMessage(err));
       return null;
     }
   }
@@ -117,15 +115,34 @@ class GoHighLevelService {
     try {
       const email = isValidEmail(contact.email) ? (contact.email as string).trim() : undefined;
       const phone = normalizePhone(contact.phone);
+      const locationId = config.goHighLevel.locationId || undefined;
       const body = {
         ...contact,
         email,
         phone,
+        locationId,
       };
       const { data } = await this.client.post(`/contacts`, body, { headers: this.headers });
-      return data?.contact || data;
+      return (data as any)?.contact || data;
     } catch (err) {
       const message = unwrapErrorMessage(err);
+      const e = err as any;
+      const res = e?.response;
+      const meta = res?.data?.meta;
+      // Duplicate rule: update existing contact instead of failing.
+      if (res?.status === 400 && meta?.contactId) {
+        try {
+          const { data } = await this.client.put(`/contacts/${meta.contactId}`, {
+            ...contact,
+          }, { headers: this.headers });
+          return (data as any)?.contact || data;
+        } catch (updateErr) {
+          console.warn(
+            "GoHighLevel update contact failed",
+            unwrapErrorMessage(updateErr)
+          );
+        }
+      }
       console.warn("GoHighLevel upsertContact failed", message);
       throw new Error(message);
     }

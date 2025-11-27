@@ -28,6 +28,7 @@ export const config = {
     baseUrl: process.env.GOHIGHLEVEL_API_BASE || "https://services.leadconnectorhq.com",
     disableOpportunities: process.env.GOHIGHLEVEL_DISABLE_OPPORTUNITIES === "true",
     uploadPdf: process.env.GOHIGHLEVEL_UPLOAD_PDF !== "false", // default true
+    locationId: process.env.GOHIGHLEVEL_LOCATION_ID || "",
   },
   openai: {
     apiKey: process.env.OPENAI_API_KEY || "",
