@@ -36,7 +36,8 @@ const unwrapErrorMessage = (err: unknown) => {
 
 class GoHighLevelService {
   private client: AxiosInstance;
-  private readonly apiPrefix = "/v2";
+  // Private Integration tokens use top-level paths (no /v2).
+  private readonly apiPrefix = "";
 
   constructor() {
     this.client = axios.create({
@@ -60,16 +61,43 @@ class GoHighLevelService {
   async findContact(query: { email?: string; phone?: string }) {
     if (!this.enabled) return null;
     try {
-      const params = new URLSearchParams();
       const email = isValidEmail(query.email) ? (query.email as string).trim() : undefined;
       const phone = normalizePhone(query.phone);
-      if (email) params.append("email", email);
-      if (phone) params.append("phone", phone);
-      if (!params.toString()) return null;
-      const { data } = await this.client.get(`${this.apiPrefix}/contacts/lookup?${params.toString()}`, {
+      if (!email && !phone) return null;
+
+      // PIT search: use /contacts?query=... (works for email/phone)
+      const search = email || phone!;
+      const params = new URLSearchParams();
+      params.append("query", search);
+
+      const { data } = await this.client.get(`/contacts?${params.toString()}`, {
         headers: this.headers,
       });
-      return data?.contact || data;
+
+      const contacts = Array.isArray((data as any)?.contacts)
+        ? (data as any).contacts
+        : Array.isArray(data)
+        ? data
+        : [];
+
+      if (!contacts.length) return null;
+
+      if (email) {
+        const match = contacts.find(
+          (c: any) => c.email && c.email.toLowerCase() === email.toLowerCase()
+        );
+        if (match) return match;
+      }
+
+      if (phone) {
+        const last4 = phone.slice(-4);
+        const match = contacts.find((c: any) =>
+          String(c.phone || "").replace(/[^\d]/g, "").endsWith(last4)
+        );
+        if (match) return match;
+      }
+
+      return contacts[0] || null;
     } catch (err) {
       console.warn("GoHighLevel lookup failed", (err as Error).message);
       return null;
@@ -94,11 +122,7 @@ class GoHighLevelService {
         email,
         phone,
       };
-      const { data } = await this.client.post(
-        `${this.apiPrefix}/contacts/`,
-        body,
-        { headers: this.headers }
-      );
+      const { data } = await this.client.post(`/contacts`, body, { headers: this.headers });
       return data?.contact || data;
     } catch (err) {
       const message = unwrapErrorMessage(err);
@@ -127,12 +151,12 @@ class GoHighLevelService {
     };
     try {
       if (ctx.opportunityId) {
-        const { data } = await this.client.put(`${this.apiPrefix}/opportunities/${ctx.opportunityId}`, payload, {
+        const { data } = await this.client.put(`/v2/opportunities/${ctx.opportunityId}`, payload, {
           headers: this.headers,
         });
         return data?.opportunity || data;
       }
-      const { data } = await this.client.post(`${this.apiPrefix}/opportunities/`, payload, {
+      const { data } = await this.client.post(`/v2/opportunities/`, payload, {
         headers: this.headers,
       });
       return data?.opportunity || data;
@@ -150,7 +174,7 @@ class GoHighLevelService {
       form.append("contactId", contactId);
       form.append("notes", "Roofing quote");
       form.append("file", fs.createReadStream(pdfPath), path.basename(pdfPath));
-      const { data } = await this.client.post(`${this.apiPrefix}/media/`, form, {
+      const { data } = await this.client.post(`/media`, form, {
         headers: {
           Authorization: `Bearer ${config.goHighLevel.apiKey}`,
           Version: "2021-07-28",
