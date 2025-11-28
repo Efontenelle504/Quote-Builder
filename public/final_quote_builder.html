@@ -25,6 +25,10 @@
   @media (min-width: 768px) { .toolbar .name { font-size: 18px; } }
   .toolbar .controls { display: flex; gap: 6px; flex-wrap: wrap; }
   @media (min-width: 768px) { .toolbar .controls { gap: 8px; } }
+  .nav { display:flex; gap:10px; padding:8px 12px; background:#fff; border-bottom:1px solid var(--border); }
+  .nav a, .nav button.nav-btn { border:1px solid var(--border); background:#fff; border-radius:8px; padding:8px 10px; font-size:13px; color: var(--ink); text-decoration:none; cursor:pointer; }
+  .nav a:hover, .nav button.nav-btn:hover { background:#f3f4f6; }
+  .nav button.nav-btn { border:1px solid #e5e7eb; }
   button { border: 1px solid var(--border); background: #fff; border-radius: 8px; padding: 10px 14px; cursor: pointer; font-size: 13px; font-weight: 500; min-height: 44px; touch-action: manipulation; }
   @media (min-width: 768px) { button { padding: 8px 12px; min-height: auto; } }
   button.primary { background: var(--brand); color: #fff; }
@@ -157,6 +161,13 @@
       <button id="copyBtn">Copy Quote Text</button>
       <button id="resetBtn">Reset</button>
     </div>
+  </div>
+  <div class="nav">
+    <a href="/final_quote_builder.html">Quote Builder</a>
+    <a href="/catalog.html">Catalog Manager</a>
+    <a href="/sales_management.html">Sales Dashboard</a>
+    <a href="/admin-users.html">User Management</a>
+    <button class="nav-btn" id="logoutNav">Logout</button>
   </div>
   <div id="saveStatus" class="muted" style="padding:8px 16px;"></div>
   <div class="wrap grid">
@@ -439,6 +450,14 @@
     const factor = Math.pow(1 + monthlyRate, n);
     return (p * monthlyRate * factor) / (factor - 1);
   };
+
+  const logoutBtn = document.getElementById('logoutNav');
+  if(logoutBtn){
+    logoutBtn.addEventListener('click', async () => {
+      try { await fetch('/api/auth/logout', { method:'POST', credentials:'include' }); } catch {}
+      window.location.href = '/login.html';
+    });
+  }
 
   // Presets for unit price, warranty, components and scope
   const BASE_SCOPE_LINES = [
