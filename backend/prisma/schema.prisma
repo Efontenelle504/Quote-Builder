@@ -21,6 +21,11 @@ enum QuoteStatus {
   ARCHIVED
 }
 
+enum UserRole {
+  ADMIN
+  SALES
+}
+
 model Product {
   id               String   @id @default(uuid())
   name             String
@@ -101,4 +106,13 @@ model Setting {
   key       String   @id
   value     Json
   updatedAt DateTime @updatedAt
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(SALES)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

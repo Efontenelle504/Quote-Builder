@@ -11,6 +11,7 @@ import aiRouter from "./routes/ai";
 import { config } from "./lib/config";
 import { ensureStorageDir } from "./lib/files";
 import authRouter from "./routes/auth";
+import adminUsersRouter from "./routes/adminUsers";
 import { authMiddleware, secureHeaders } from "./middleware/auth";
 
 const app = express();
@@ -33,6 +34,7 @@ app.use("/api/auth", authRouter);
 
 // Protect all other /api routes
 app.use("/api", authMiddleware);
+app.use("/api/admin/users", adminUsersRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/quotes", quotesRouter);
 app.use("/api/crm", crmRouter);

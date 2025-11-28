@@ -3,7 +3,8 @@ import crypto from "crypto";
 import { config } from "../lib/config";
 
 interface AuthTokenPayload {
-  sub: string;
+  sub: string; // user id
+  role: string;
   exp: number;
 }
 
@@ -30,10 +31,10 @@ function verifyToken(token: string, secret: string): AuthTokenPayload | null {
   return parsed;
 }
 
-export function issueToken(email: string) {
+export function issueToken(userId: string, role: string) {
   const ttlMinutes = config.auth.tokenTtlMinutes;
   const exp = Math.floor(Date.now() / 1000) + ttlMinutes * 60;
-  return signToken({ sub: email, exp }, config.auth.jwtSecret);
+  return signToken({ sub: userId, role, exp }, config.auth.jwtSecret);
 }
 
 function extractToken(req: Request): string | null {
@@ -49,8 +50,19 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
   if (!token) return res.status(401).json({ message: "Unauthorized" });
   const payload = verifyToken(token, config.auth.jwtSecret);
   if (!payload) return res.status(401).json({ message: "Unauthorized" });
-  (req as any).user = { email: payload.sub };
+  (req as any).user = { id: payload.sub, role: payload.role };
   return next();
+}
+
+export function requireRole(role: "ADMIN" | "SALES") {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const user = (req as any).user;
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
+    if (role === "ADMIN" && user.role !== "ADMIN") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    next();
+  };
 }
 
 // Minimal login throttling by IP
