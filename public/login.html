@@ -13,7 +13,6 @@
     button { width:100%; padding:10px; border:none; border-radius:8px; background:#b11226; color:#fff; font-weight:600; cursor:pointer; margin-top:8px; }
     .status { margin-top:12px; font-size:13px; color:#666; }
   </style>
-  <script src="/auth-guard.js"></script>
 </head>
 <body>
   <div class="card">
@@ -38,14 +37,13 @@
         const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({ email, password })
         });
         if (!res.ok) {
           const text = await res.text();
           throw new Error(text || 'Login failed');
         }
-        const data = await res.json();
-        window.authGuard.setToken(data.token);
         statusEl.textContent = 'Success. Redirecting...';
         window.location.href = '/final_quote_builder.html';
       } catch (err) {

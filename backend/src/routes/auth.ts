@@ -41,7 +41,13 @@ router.post("/login", rateLimitAuth, (req, res) => {
     }
 
     const token = issueToken(user.id, user.role);
-    return res.json({ token, role: user.role, expiresInMinutes: config.auth.tokenTtlMinutes });
+    res.cookie("auth", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: config.auth.tokenTtlMinutes * 60 * 1000,
+    });
+    return res.json({ role: user.role, expiresInMinutes: config.auth.tokenTtlMinutes });
   })().catch((err) => {
     console.error(err);
     return res.status(500).json({ message: "Login failed" });
@@ -49,7 +55,14 @@ router.post("/login", rateLimitAuth, (req, res) => {
 });
 
 router.post("/logout", (_req, res) => {
+  res.clearCookie("auth");
   res.json({ message: "Logged out" });
+});
+
+router.get("/me", (req, res) => {
+  const user = (req as any).user;
+  if (!user) return res.status(401).json({ message: "Unauthorized" });
+  res.json({ id: user.id, role: user.role });
 });
 
 export default router;

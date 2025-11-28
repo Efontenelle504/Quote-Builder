@@ -1,43 +1,24 @@
 import { Request, Response, NextFunction } from "express";
-import crypto from "crypto";
+import jwt from "jsonwebtoken";
 import { config } from "../lib/config";
 
 interface AuthTokenPayload {
   sub: string; // user id
   role: string;
-  exp: number;
 }
 
 const bearerPrefix = "bearer ";
 
-function signToken(payload: AuthTokenPayload, secret: string) {
-  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
-  const sig = crypto.createHmac("sha256", secret).update(body).digest("base64url");
-  return `${body}.${sig}`;
-}
-
-function verifyToken(token: string, secret: string): AuthTokenPayload | null {
-  const parts = token.split(".");
-  if (parts.length !== 2) return null;
-  const [body, sig] = parts;
-  if (!body || !sig) return null;
-  const expected = crypto.createHmac("sha256", secret).update(body).digest("base64url");
-  const a = Buffer.from(sig, "utf8");
-  const b = Buffer.from(expected, "utf8");
-  if (a.length !== b.length) return null;
-  if (!crypto.timingSafeEqual(a, b)) return null;
-  const parsed = JSON.parse(Buffer.from(body, "base64url").toString()) as AuthTokenPayload;
-  if (!parsed?.exp || parsed.exp * 1000 < Date.now()) return null;
-  return parsed;
-}
-
 export function issueToken(userId: string, role: string) {
-  const ttlMinutes = config.auth.tokenTtlMinutes;
-  const exp = Math.floor(Date.now() / 1000) + ttlMinutes * 60;
-  return signToken({ sub: userId, role, exp }, config.auth.jwtSecret);
+  return jwt.sign({ sub: userId, role } as AuthTokenPayload, config.auth.jwtSecret, {
+    expiresIn: `${config.auth.tokenTtlMinutes}m`,
+  });
 }
 
 function extractToken(req: Request): string | null {
+  // Prefer cookie, fallback to Authorization header
+  const cookieToken = (req as any).cookies?.auth as string | undefined;
+  if (cookieToken) return cookieToken;
   const authHeader = req.headers.authorization || "";
   if (authHeader.toLowerCase().startsWith(bearerPrefix)) {
     return authHeader.slice(bearerPrefix.length).trim();
@@ -48,10 +29,13 @@ function extractToken(req: Request): string | null {
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
   const token = extractToken(req);
   if (!token) return res.status(401).json({ message: "Unauthorized" });
-  const payload = verifyToken(token, config.auth.jwtSecret);
-  if (!payload) return res.status(401).json({ message: "Unauthorized" });
-  (req as any).user = { id: payload.sub, role: payload.role };
-  return next();
+  try {
+    const payload = jwt.verify(token, config.auth.jwtSecret) as AuthTokenPayload;
+    (req as any).user = { id: payload.sub, role: payload.role };
+    return next();
+  } catch {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
 }
 
 export function requireRole(role: "ADMIN" | "SALES") {

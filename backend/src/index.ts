@@ -2,6 +2,7 @@ import "dotenv/config";
 import cors from "cors";
 import express from "express";
 import path from "path";
+import cookieParser from "cookie-parser";
 import productsRouter from "./routes/products";
 import quotesRouter from "./routes/quotes";
 import crmRouter from "./routes/crm";
@@ -24,6 +25,7 @@ app.use(
   })
 );
 app.use(express.json({ limit: "5mb" }));
+app.use(cookieParser());
 app.use(secureHeaders);
 
 app.get("/health", (_req, res) => {
