@@ -268,21 +268,7 @@
       <details class="card" open>
         <summary>Adders & Options</summary>
         <div class="content">
-          <div class="flex" style="align-items:center">
-            <label class="flex"><input type="checkbox" data-bind="deck.include" /> Include Decking Allowance</label>
-          </div>
-          <div id="deckRow" class="row row-3" style="margin-top:8px; display:none">
-            <label>Est. Sheets<input type="number" data-bind="deck.estSheets" min="0" /></label>
-            <label>Sheet Price<input type="number" data-bind="deck.sheetPrice" min="0" /></label>
-            <label>Free Sheets<input type="number" data-bind="deck.freeSheets" min="0" /></label>
-          </div>
-          <label class="flex" style="margin-top:8px"><input type="checkbox" data-bind="disc.enabled" /> Apply discount (%)</label>
-          <div id="discRow" class="row row-3" style="margin-top:8px; display:none">
-            <label>Discount %<input type="number" data-bind="disc.percent" min="0" max="100" step="0.1" /></label>
-          </div>
-          <label class="flex" style="margin-top:8px"><input type="checkbox" data-bind="showAltPly" /> Show option: Customer-supplied plywood (labor-only @ $25/sq)</label>
-          <label style="margin-top:8px">Sales Tax (%)<input type="number" data-bind="tax" min="0" /></label>
-          <div style="margin-top:12px; padding:10px; border:1px solid var(--border); border-radius:8px; background:#fafafa">
+          <div style="margin-top:4px; padding:10px; border:1px solid var(--border); border-radius:8px; background:#fafafa">
             <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
               <strong>Financing (estimate)</strong>
               <span class="muted">For your reference; optional on quote</span>
@@ -295,6 +281,25 @@
             <label class="flex" style="margin-top:6px"><input type="checkbox" data-bind="fin.showDetails" /> Include term & APR text on quote</label>
             <div class="muted" style="margin-top:8px">Estimated monthly (calc): <strong id="calcMonthly"></strong></div>
           </div>
+          <details style="margin-top:12px; padding:0 2px;">
+            <summary style="font-weight:600; cursor:pointer;">Advanced options (decking, discount, alt plywood, tax)</summary>
+            <div style="margin-top:8px; display:grid; gap:8px;">
+              <div class="flex" style="align-items:center">
+                <label class="flex"><input type="checkbox" data-bind="deck.include" /> Include Decking Allowance</label>
+              </div>
+              <div id="deckRow" class="row row-3" style="display:none">
+                <label>Est. Sheets<input type="number" data-bind="deck.estSheets" min="0" /></label>
+                <label>Sheet Price<input type="number" data-bind="deck.sheetPrice" min="0" /></label>
+                <label>Free Sheets<input type="number" data-bind="deck.freeSheets" min="0" /></label>
+              </div>
+              <label class="flex"><input type="checkbox" data-bind="disc.enabled" /> Apply discount (%)</label>
+              <div id="discRow" class="row row-3" style="display:none">
+                <label>Discount %<input type="number" data-bind="disc.percent" min="0" max="100" step="0.1" /></label>
+              </div>
+              <label class="flex"><input type="checkbox" data-bind="showAltPly" /> Show option: Customer-supplied plywood (labor-only @ $25/sq)</label>
+              <label>Sales Tax (%)<input type="number" data-bind="tax" min="0" /></label>
+            </div>
+          </details>
         </div>
       </details>
       <details class="card" open>
