@@ -29,6 +29,11 @@ const financingSchema = z.object({
   showDetails: z.boolean().optional(),
 });
 
+const discountSchema = z.object({
+  enabled: z.boolean().optional(),
+  percent: z.number().nonnegative().optional(),
+});
+
 const quoteSchema = z.object({
   company: z
     .object({
@@ -62,6 +67,7 @@ const quoteSchema = z.object({
   disclaimerText: z.string().optional(),
   taxRate: z.number().optional(),
   deck: deckSchema.optional(),
+  discount: discountSchema.optional(),
   areas: z.array(areaSchema).min(1),
   notes: z.string().optional(),
   scopeIntroOverride: z.string().optional(),

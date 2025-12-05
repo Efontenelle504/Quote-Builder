@@ -275,6 +275,10 @@
             <label>Sheet Price<input type="number" data-bind="deck.sheetPrice" min="0" /></label>
             <label>Free Sheets<input type="number" data-bind="deck.freeSheets" min="0" /></label>
           </div>
+          <label class="flex" style="margin-top:8px"><input type="checkbox" data-bind="disc.enabled" /> Apply discount (%)</label>
+          <div id="discRow" class="row row-3" style="margin-top:8px; display:none">
+            <label>Discount %<input type="number" data-bind="disc.percent" min="0" max="100" step="0.1" /></label>
+          </div>
           <label class="flex" style="margin-top:8px"><input type="checkbox" data-bind="showAltPly" /> Show option: Customer-supplied plywood (labor-only @ $25/sq)</label>
           <label style="margin-top:8px">Sales Tax (%)<input type="number" data-bind="tax" min="0" /></label>
           <div style="margin-top:12px; padding:10px; border:1px solid var(--border); border-radius:8px; background:#fafafa">
@@ -541,6 +545,7 @@
     applyPreset:true,
     areas:[ { id:1, name:'Main roof', squares:0, unitPrice: DEFAULT_PRODUCTS['GAF Timberline HDZ (50-Year System Warranty)'].unitPrice, include:true } ],
     deck:{ include:false, estSheets:0, sheetPrice:85, freeSheets:5 },
+    disc:{ enabled:false, percent:0 },
     showAltPly:true,
     tax:0,
     fin:{ years:15, apr:9.99, showOnQuote:false, showDetails:false },
@@ -732,6 +737,7 @@
       disclaimerText: state.disclaimerText,
       taxRate: Number(state.tax || 0),
       deck: state.deck,
+      discount: state.disc,
       areas: state.areas,
       notes: scopeOverride || undefined,
       scopeIntroOverride: state.scopeIntroOverride || undefined,
@@ -852,6 +858,11 @@
         : state.areas;
       state.deck = data.deckAllowance || state.deck;
       state.tax = data.taxRate || 0;
+      if(data.adders && data.adders.discount){
+        const d = data.adders.discount;
+        state.disc.enabled = !!d.enabled || (typeof d.percent === 'number' && d.percent > 0);
+        state.disc.percent = typeof d.percent === 'number' ? d.percent : state.disc.percent;
+      }
       state.scopeIntroOverride = data.scopeIntro || '';
       state.scopeListText = Array.isArray(data.scopeBullets) ? data.scopeBullets.join('\\n') : '';
       state.componentsText = Array.isArray(data.components) ? data.components.join('\\n') : '';
@@ -1318,9 +1329,13 @@
     const extraSheets = Math.max(0, ceilSq(state.deck.estSheets) - ceilSq(state.deck.freeSheets));
     const deckCost = state.deck.include ? extraSheets * (state.deck.sheetPrice || 0) : 0;
     const subtotal = areaSubtotal + deckCost;
-    const taxAmt = subtotal * ((parseFloat(state.tax) || 0)/100);
-    const grand = subtotal + taxAmt;
-    return { rows, totalSq, areaSubtotal, deckCost, subtotal, taxAmt, grand };
+    const discPercent = state.disc && state.disc.enabled ? Math.max(0, Number(state.disc.percent || 0)) : 0;
+    const discRate = discPercent / 100;
+    const discountAmt = subtotal * discRate;
+    const taxableBase = subtotal - discountAmt;
+    const taxAmt = taxableBase * ((parseFloat(state.tax) || 0)/100);
+    const grand = taxableBase + taxAmt;
+    return { rows, totalSq, areaSubtotal, deckCost, subtotal, discountAmt, discPercent, taxableBase, taxAmt, grand };
   }
 
   // Render preview
@@ -1393,7 +1408,10 @@
       computedPricing.push(`${r.name} (${r.sq} sq): ${fmtUSD(r.line)}`);
     });
     if(state.deck.include) computedPricing.push(`Decking: +${fmtUSD(data.deckCost)}`);
-    computedPricing.push(`Subtotal before tax: ${fmtUSD(data.subtotal)}`);
+    computedPricing.push(`Subtotal before discount/tax: ${fmtUSD(data.subtotal)}`);
+    if(data.discountAmt && data.discPercent){
+      computedPricing.push(`Discount (${data.discPercent}%): -${fmtUSD(data.discountAmt)}`);
+    }
     if(state.tax) computedPricing.push(`Sales tax (${state.tax}%): ${fmtUSD(data.taxAmt)}`);
     computedPricing.push(`TOTAL: ${fmtUSD(data.grand)}`);
     if(showMonthly){
@@ -1492,7 +1510,10 @@
     lines.push('PRICING SUMMARY');
     data.rows.filter(r=>r.include).forEach(r => lines.push(`${r.name} (${r.sq} squares): ${fmtUSD(r.line)}`));
     if(state.deck.include) lines.push('Decking: +' + fmtUSD(data.deckCost));
-    lines.push('SUBTOTAL BEFORE TAX: ' + fmtUSD(data.subtotal));
+    lines.push('SUBTOTAL BEFORE DISCOUNT/TAX: ' + fmtUSD(data.subtotal));
+    if(data.discountAmt && data.discPercent){
+      lines.push('DISCOUNT (' + data.discPercent + '%): -' + fmtUSD(data.discountAmt));
+    }
     if(state.tax) lines.push('Sales tax (' + state.tax + '%): ' + fmtUSD(data.taxAmt));
     lines.push('TOTAL: ' + fmtUSD(data.grand));
     if(showMonthly){
@@ -1554,10 +1575,21 @@
     });
     syncBoundInputs();
     // Deck include toggle
-    $('[data-bind="deck.include"]').addEventListener('change', e => {
-      $('#deckRow').style.display = e.target.checked ? 'grid' : 'none';
-    });
-    $('#deckRow').style.display = state.deck.include ? 'grid' : 'none';
+    const deckToggle = $('[data-bind="deck.include"]');
+    if(deckToggle){
+      deckToggle.addEventListener('change', e => {
+        $('#deckRow').style.display = e.target.checked ? 'grid' : 'none';
+      });
+      $('#deckRow').style.display = state.deck.include ? 'grid' : 'none';
+    }
+    // Discount toggle
+    const discToggle = $('[data-bind="disc.enabled"]');
+    if(discToggle){
+      discToggle.addEventListener('change', e => {
+        $('#discRow').style.display = e.target.checked ? 'grid' : 'none';
+      });
+      $('#discRow').style.display = state.disc && state.disc.enabled ? 'grid' : 'none';
+    }
     // Scope override box
     $('#scopeOverride').value = '';
     $('#scopeOverride').addEventListener('input', () => render());

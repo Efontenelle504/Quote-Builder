@@ -5,7 +5,8 @@ const ceilSquares = (value: number | undefined) => Math.max(0, Math.ceil(Number(
 export function calculateTotals(
   areas: AreaPayload[],
   deck: DeckPayload | undefined,
-  taxRate: number | undefined
+  taxRate: number | undefined,
+  discountPercentInput?: number
 ): QuoteCalculations {
   const rows = areas.map((area) => {
     const squares = ceilSquares(area.squares);
@@ -27,15 +28,22 @@ export function calculateTotals(
   }
 
   const subtotal = areaSubtotal + deckCost;
+  const discountPercent = Math.max(0, Number(discountPercentInput || 0));
+  const discountRate = discountPercent / 100;
+  const discountAmount = subtotal * discountRate;
+  const taxableSubtotal = subtotal - discountAmount;
   const taxPercent = Number(taxRate || 0) / 100;
-  const taxAmount = subtotal * taxPercent;
-  const grandTotal = subtotal + taxAmount;
+  const taxAmount = taxableSubtotal * taxPercent;
+  const grandTotal = taxableSubtotal + taxAmount;
 
   return {
     rows,
     totalSquares,
     deckCost,
     subtotal,
+    discountPercent,
+    discountAmount,
+    taxableSubtotal,
     taxAmount,
     grandTotal,
   };
@@ -47,7 +55,10 @@ export const usd = (value: number) =>
 export function buildPricingLines(calcs: QuoteCalculations, taxRate?: number) {
   const lines: string[] = [];
   lines.push(`Squares (rounded): ${calcs.totalSquares}`);
-  lines.push(`Subtotal before tax: ${usd(calcs.subtotal)}`);
+  lines.push(`Subtotal before discount/tax: ${usd(calcs.subtotal)}`);
+  if (calcs.discountAmount > 0 && calcs.discountPercent > 0) {
+    lines.push(`Discount (${calcs.discountPercent}%): -${usd(calcs.discountAmount)}`);
+  }
   if (taxRate) {
     lines.push(`Sales tax (${taxRate}%): ${usd(calcs.taxAmount)}`);
   }

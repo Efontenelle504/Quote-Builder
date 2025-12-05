@@ -20,6 +20,11 @@ export interface FinancingPayload {
   showDetails?: boolean;
 }
 
+export interface DiscountPayload {
+  enabled?: boolean;
+  percent?: number;
+}
+
 export interface QuoteRequestPayload {
   company?: {
     name?: string;
@@ -48,6 +53,7 @@ export interface QuoteRequestPayload {
   disclaimerText?: string;
   taxRate?: number;
   deck?: DeckPayload;
+  discount?: DiscountPayload;
   areas: AreaPayload[];
   notes?: string;
   scopeIntroOverride?: string;
@@ -71,7 +77,10 @@ export interface QuoteCalculations {
   }>;
   totalSquares: number;
   deckCost: number;
-  subtotal: number;
+  subtotal: number; // before discount and tax
+  discountPercent: number;
+  discountAmount: number;
+  taxableSubtotal: number;
   taxAmount: number;
   grandTotal: number;
 }

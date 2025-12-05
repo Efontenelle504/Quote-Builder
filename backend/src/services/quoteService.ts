@@ -180,7 +180,9 @@ export const quoteService = {
     const deck = payload.deck || { include: false };
     const taxRate = Number(payload.taxRate || 0);
 
-    const calcs = calculateTotals(payload.areas, deck, taxRate);
+    const discountPercent =
+      payload.discount && payload.discount.enabled ? Number(payload.discount.percent || 0) : 0;
+    const calcs = calculateTotals(payload.areas, deck, taxRate, discountPercent);
     const product = payload.systemSlug ? await productService.getBySlug(payload.systemSlug) : null;
     const systemName = payload.systemName || product?.name || payload.areas[0]?.name || "Roof System";
 
