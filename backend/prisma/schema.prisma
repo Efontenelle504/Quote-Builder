@@ -31,6 +31,8 @@ model Product {
   name             String
   slug             String   @unique
   category         String?
+  manufacturer     String?
+  isFortified      Boolean  @default(false)
   description      String?
   unitPrice        Decimal? @db.Decimal(10, 2)
   warrantyText     String?

@@ -49,12 +49,16 @@ const products: Array<{
   imageUrl?: string;
   isCustom?: boolean;
   isApproved?: boolean;
+  manufacturer?: string;
+  isFortified?: boolean;
 }> = [
   {
     name: "Zuppardo’s Special – Atlas ProLam (Non-FORTIFIED)",
     category: "Roofing",
     description: "Zuppardo’s Special non-fortified Atlas ProLam shingle roofing system.",
     unitPrice: 0,
+    manufacturer: "Atlas",
+    isFortified: false,
     warrantyText: "2-year material warranty and 2-year workmanship warranty from Zuppardo’s Renovations.",
     scopeIntro: "Install the Zuppardo’s Special Atlas ProLam shingle roofing system covering {{TOTAL_SQUARES}} squares.",
     scopeBullets: [
@@ -81,6 +85,8 @@ const products: Array<{
     category: "Roofing",
     description: "Non-fortified Atlas Pinnacle Pristine Designer shingle roofing system.",
     unitPrice: 0,
+    manufacturer: "Atlas",
+    isFortified: false,
     warrantyText: "Limited lifetime material warranty from Atlas Roofing and 5-year workmanship warranty from Zuppardo’s Renovations.",
     scopeIntro: "Install a non-fortified Atlas Pinnacle Pristine Designer shingle roofing system covering {{TOTAL_SQUARES}} squares.",
     scopeBullets: [
@@ -107,6 +113,8 @@ const products: Array<{
     category: "Roofing",
     description: "Non-fortified GAF Timberline HDZ™ shingle roofing system.",
     unitPrice: 0,
+    manufacturer: "GAF",
+    isFortified: false,
     warrantyText: "GAF Gold Pledge warranty with 50-year system coverage, 15-year wind protection, and 25-year workmanship warranty.",
     scopeIntro: "Install a non-fortified GAF Timberline HDZ™ shingle roofing system covering {{TOTAL_SQUARES}} squares.",
     scopeBullets: [
@@ -133,6 +141,8 @@ const products: Array<{
     category: "Roofing",
     description: "Non-fortified Owens Corning Duration™ shingle roofing system.",
     unitPrice: 0,
+    manufacturer: "Owens Corning",
+    isFortified: false,
     warrantyText: "Owens Corning Preferred warranty and 10-year workmanship warranty from Owens Corning.",
     scopeIntro: "Install a non-fortified Owens Corning Duration™ shingle roofing system covering {{TOTAL_SQUARES}} squares.",
     scopeBullets: [
@@ -159,6 +169,8 @@ const products: Array<{
     category: "Roofing",
     description: "FORTIFIED Atlas Pinnacle Pristine Designer shingle roofing system.",
     unitPrice: 0,
+    manufacturer: "Atlas",
+    isFortified: true,
     warrantyText: "Guaranteed FORTIFIED certificate, limited lifetime material warranty from Atlas Roofing, and 5-year workmanship warranty from Zuppardo’s Renovations.",
     scopeIntro: "Install a FORTIFIED Atlas Pinnacle Pristine Designer shingle roofing system covering {{TOTAL_SQUARES}} squares.",
     scopeBullets: [
@@ -184,6 +196,8 @@ const products: Array<{
     category: "Roofing",
     description: "FORTIFIED GAF Timberline HDZ™ shingle roofing system with 50-year system warranty and 15-year unlimited wind protection.",
     unitPrice: 0,
+    manufacturer: "GAF",
+    isFortified: true,
     warrantyText: "Guaranteed FORTIFIED certificate, GAF Gold Pledge warranty, 15-year unlimited wind warranty, and 25-year workmanship warranty.",
     scopeIntro: "Install a FORTIFIED GAF Timberline HDZ™ shingle roofing system covering {{TOTAL_SQUARES}} squares.",
     scopeBullets: [
@@ -209,6 +223,8 @@ const products: Array<{
     category: "Roofing",
     description: "Zuppardo’s Special FORTIFIED Atlas ProLam shingle roofing system.",
     unitPrice: 0,
+    manufacturer: "Atlas",
+    isFortified: true,
     warrantyText: "Guaranteed FORTIFIED certificate plus 2-year material and 2-year workmanship warranty from Zuppardo’s Renovations.",
     scopeIntro: "Install the Zuppardo’s Special FORTIFIED Atlas ProLam shingle roofing system covering {{TOTAL_SQUARES}} squares.",
     scopeBullets: [
@@ -234,6 +250,8 @@ const products: Array<{
     category: "Roofing",
     description: "FORTIFIED Owens Corning Duration™ shingle roofing system.",
     unitPrice: 0,
+    manufacturer: "Owens Corning",
+    isFortified: true,
     warrantyText: "Guaranteed FORTIFIED certificate, Owens Corning Preferred warranty, and 10-year workmanship warranty from Owens Corning.",
     scopeIntro: "Install a FORTIFIED Owens Corning Duration™ shingle roofing system covering {{TOTAL_SQUARES}} squares.",
     scopeBullets: [
