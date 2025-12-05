@@ -23,6 +23,61 @@ const productSchema = z.object({
   isApproved: z.boolean().optional(),
 });
 
+router.get("/export/csv", async (_req, res, next) => {
+  try {
+    const products = await productService.list({ includeUnapproved: true });
+    const header = [
+      "id",
+      "name",
+      "category",
+      "description",
+      "unitPrice",
+      "warrantyText",
+      "scopeIntro",
+      "scopeBullets",
+      "componentBullets",
+      "tags",
+      "imageUrl",
+      "isCustom",
+      "isApproved",
+      "ownerEmail",
+    ];
+    const escape = (value: unknown) => {
+      if (value === null || value === undefined) return "";
+      const str = String(value);
+      const escaped = str.replace(/"/g, '""');
+      return `"${escaped}"`;
+    };
+    const rows = products.map((p) => {
+      const scopeBullets = Array.isArray(p.scopeBullets) ? (p.scopeBullets as string[]).join(" | ") : "";
+      const componentBullets = Array.isArray(p.componentBullets) ? (p.componentBullets as string[]).join(" | ") : "";
+      const tags = Array.isArray(p.tags) ? p.tags.join(",") : "";
+      return [
+        escape(p.id),
+        escape(p.name),
+        escape(p.category),
+        escape(p.description),
+        escape(p.unitPrice),
+        escape(p.warrantyText),
+        escape(p.scopeIntro),
+        escape(scopeBullets),
+        escape(componentBullets),
+        escape(tags),
+        escape(p.imageUrl),
+        escape(p.isCustom),
+        escape(p.isApproved),
+        escape(p.ownerEmail),
+      ].join(",");
+    });
+    const csv = [header.join(","), ...rows].join("\n");
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", 'attachment; filename="products-export.csv"');
+    res.send(csv);
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get("/", async (req, res) => {
   const includeUnapproved = req.query.includeUnapproved === "true";
   const ownerEmail = typeof req.query.ownerEmail === "string" ? req.query.ownerEmail : undefined;

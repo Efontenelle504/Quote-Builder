@@ -66,7 +66,13 @@
     <section class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
         <h2>Product Library</h2>
-        <button class="primary" id="newProductBtn">New Product</button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="exportCsvBtn">Export CSV</button>
+          <a href="/products-sample.csv" download style="text-decoration:none;">
+            <button type="button">Sample CSV</button>
+          </a>
+          <button class="primary" id="newProductBtn">New Product</button>
+        </div>
       </div>
       <div class="table-wrapper">
         <table>
@@ -365,6 +371,13 @@
         qs('#formTitle').textContent = 'Add Product';
         setFormStatus('');
       });
+
+      const exportBtn = qs('#exportCsvBtn');
+      if(exportBtn){
+        exportBtn.addEventListener('click', () => {
+          window.location.href = '/api/products/export/csv';
+        });
+      }
 
       qs('#saveDefaultsBtn').addEventListener('click', async () => {
         const scope = qs('#defaultScope').value.split('\n').map(x => x.trim()).filter(Boolean);
