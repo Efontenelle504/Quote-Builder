@@ -12,6 +12,9 @@ export interface ProductInput {
   componentBullets?: string[];
   tags?: string[];
   imageUrl?: string;
+  category?: string;
+  manufacturer?: string;
+  isFortified?: boolean;
   isCustom?: boolean;
   ownerEmail?: string;
   createdBy?: string;
@@ -52,6 +55,9 @@ export const productService = {
         scopeBullets: input.scopeBullets ?? [],
         componentBullets: input.componentBullets ?? [],
         tags: input.tags ?? [],
+        category: input.category,
+        manufacturer: input.manufacturer,
+        isFortified: input.isFortified ?? false,
         ownerEmail: input.ownerEmail?.toLowerCase(),
         isApproved: input.isApproved ?? !input.isCustom,
       },
@@ -68,6 +74,9 @@ export const productService = {
         scopeBullets: input.scopeBullets ?? [],
         componentBullets: input.componentBullets ?? [],
         tags: input.tags ?? [],
+        category: input.category,
+        manufacturer: input.manufacturer,
+        isFortified: input.isFortified ?? false,
         ownerEmail: input.ownerEmail?.toLowerCase(),
       },
     });

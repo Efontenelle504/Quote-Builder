@@ -51,6 +51,7 @@
       .wrap .card:nth-child(3) { grid-column: 1 / span 2; }
     }
   </style>
+  <script src="/app-nav.js"></script>
 </head>
 <body>
   <div class="toolbar">
@@ -64,9 +65,24 @@
     </div>
   </div>
   <div class="wrap">
-    <section class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-        <h2>Product Library</h2>
+    <section class="card" style="display:grid; gap:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+          <h2 style="margin:0;">Product Library</h2>
+          <label style="font-weight:600; margin:0;">Category
+            <select id="filterCategory">
+              <option value="">All</option>
+            </select>
+          </label>
+          <label style="font-weight:600; margin:0;">Manufacturer
+            <select id="filterManufacturer">
+              <option value="">All</option>
+            </select>
+          </label>
+          <label style="display:flex; align-items:center; gap:6px; font-weight:600; margin:0;">
+            <input type="checkbox" id="filterFortified" /> Fortified only
+          </label>
+        </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button id="exportCsvBtn">Export CSV</button>
           <a href="/products-sample.csv" download style="text-decoration:none;">
@@ -80,9 +96,10 @@
           <thead>
             <tr>
               <th>Name</th>
+              <th>Category</th>
+              <th>Manufacturer</th>
               <th>Unit Price</th>
               <th>Status</th>
-              <th>Owner</th>
               <th></th>
             </tr>
           </thead>
@@ -94,6 +111,8 @@
       <h3 id="formTitle">Add Product</h3>
       <form id="productForm">
         <label>Name<input id="prodName" required /></label>
+        <label>Category<input id="prodCategory" placeholder="Roofing, Siding, Painting..." /></label>
+        <label>Manufacturer<input id="prodManufacturer" placeholder="Atlas, GAF, Owens Corning..." /></label>
         <label>Description<textarea id="prodDescription"></textarea></label>
         <label>Unit Price ($/sq)<input id="prodPrice" type="number" min="0" step="1" /></label>
         <label>Badge / Image URL<input id="prodImageUrl" placeholder="https://... (or will be filled from upload)" /></label>
@@ -108,6 +127,7 @@
         <div style="display:flex; gap:8px; align-items:center; margin-top:12px; flex-wrap:wrap;">
           <label style="display:flex; gap:6px; align-items:center; font-weight:500"><input type="checkbox" id="prodApproved" /> Approved</label>
           <label style="display:flex; gap:6px; align-items:center; font-weight:500"><input type="checkbox" id="prodCustom" /> Custom</label>
+          <label style="display:flex; gap:6px; align-items:center; font-weight:500"><input type="checkbox" id="prodFortified" /> Fortified</label>
         </div>
         <div class="actions" style="margin-top:12px;">
           <button type="submit" class="primary">Save</button>
@@ -115,6 +135,36 @@
         </div>
       </form>
       <div id="productFormStatus" class="muted"></div>
+    </section>
+    <section class="card">
+      <h3>Preview</h3>
+      <div id="previewEmpty" class="muted">Select a product to preview how it will render in a quote.</div>
+      <div id="previewCard" style="display:none;">
+        <div style="font-weight:700; font-size:16px;" id="prevName"></div>
+        <div class="muted" id="prevMeta"></div>
+        <div style="margin-top:8px;" id="prevDesc"></div>
+        <div style="margin-top:8px; font-weight:600;">Unit Price: <span id="prevPrice"></span></div>
+        <div style="margin-top:12px;">
+          <div style="font-weight:600;">Scope Intro</div>
+          <div id="prevScopeIntro" class="muted"></div>
+        </div>
+        <div style="margin-top:8px;">
+          <div style="font-weight:600;">Scope Bullets</div>
+          <ul id="prevScopeList" style="padding-left:18px; margin:4px 0;"></ul>
+        </div>
+        <div style="margin-top:8px;">
+          <div style="font-weight:600;">Components</div>
+          <ul id="prevCompList" style="padding-left:18px; margin:4px 0;"></ul>
+        </div>
+        <div style="margin-top:8px;">
+          <div style="font-weight:600;">Warranty</div>
+          <div id="prevWarranty" class="muted"></div>
+        </div>
+        <div style="margin-top:8px;">
+          <div style="font-weight:600;">Tags</div>
+          <div id="prevTags" class="muted"></div>
+        </div>
+      </div>
     </section>
     <section class="card">
       <h3>Template Defaults</h3>
@@ -172,6 +222,7 @@
       let products = [];
       let selectedId = null;
       let productAiState = null;
+      let filters = { category:'', manufacturer:'', fortified:false };
 
       const fmtUSD = (value) => Number(value || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 
@@ -196,6 +247,59 @@
         const el = qs('#productFormStatus');
         el.textContent = message || '';
         el.style.color = isError ? '#b11226' : 'var(--muted)';
+      }
+
+      function applyFilters(list){
+        return list.filter(p => {
+          if(filters.category && String(p.category || '').toLowerCase() !== filters.category.toLowerCase()) return false;
+          if(filters.manufacturer && String(p.manufacturer || '').toLowerCase() !== filters.manufacturer.toLowerCase()) return false;
+          if(filters.fortified && !p.isFortified) return false;
+          return true;
+        });
+      }
+
+      function populateFilterOptions(){
+        const cats = new Set();
+        const mans = new Set();
+        products.forEach(p => {
+          if(p.category) cats.add(p.category);
+          if(p.manufacturer) mans.add(p.manufacturer);
+        });
+        const catSel = qs('#filterCategory');
+        const manSel = qs('#filterManufacturer');
+        if(catSel){
+          catSel.innerHTML = '<option value=\"\">All</option>' + Array.from(cats).sort().map(c => `<option value=\"${c}\">${c}</option>`).join('');
+        }
+        if(manSel){
+          manSel.innerHTML = '<option value=\"\">All</option>' + Array.from(mans).sort().map(m => `<option value=\"${m}\">${m}</option>`).join('');
+        }
+      }
+
+      function setPreview(prod){
+        const empty = qs('#previewEmpty');
+        const card = qs('#previewCard');
+        if(!prod){
+          empty.style.display = 'block';
+          card.style.display = 'none';
+          return;
+        }
+        empty.style.display = 'none';
+        card.style.display = 'block';
+        qs('#prevName').textContent = prod.name || '';
+        qs('#prevMeta').textContent = [prod.category, prod.manufacturer, prod.isFortified ? 'FORTIFIED' : ''].filter(Boolean).join(' • ');
+        qs('#prevDesc').textContent = prod.description || '';
+        qs('#prevPrice').textContent = fmtUSD(prod.unitPrice || 0);
+        qs('#prevScopeIntro').textContent = prod.scopeIntro || '';
+        const scopeList = qs('#prevScopeList'); scopeList.innerHTML = '';
+        (Array.isArray(prod.scopeBullets) ? prod.scopeBullets : []).forEach(line => {
+          const li = document.createElement('li'); li.textContent = line; scopeList.appendChild(li);
+        });
+        const compList = qs('#prevCompList'); compList.innerHTML = '';
+        (Array.isArray(prod.componentBullets) ? prod.componentBullets : []).forEach(line => {
+          const li = document.createElement('li'); li.textContent = line; compList.appendChild(li);
+        });
+        qs('#prevWarranty').textContent = prod.warrantyText || '';
+        qs('#prevTags').textContent = Array.isArray(prod.tags) ? prod.tags.join(', ') : '';
       }
 
       function wireImageUpload(){
@@ -228,6 +332,7 @@
           const res = await fetch('/api/products?includeUnapproved=true');
           const data = await res.json();
           products = Array.isArray(data) ? data : [];
+          populateFilterOptions();
           renderTable();
         }catch(err){
           console.error(err);
@@ -269,22 +374,25 @@
       }
 
       function renderTable(){
-        if(products.length === 0){
+        const rows = applyFilters(products);
+        if(rows.length === 0){
           productRows.innerHTML = '<tr><td colspan="6" class="muted">No products yet.</td></tr>';
           return;
         }
         productRows.innerHTML = '';
-        products.forEach((prod) => {
+        rows.forEach((prod) => {
           const tr = document.createElement('tr');
           const status = prod.isApproved ? 'Approved' : 'Pending';
           tr.innerHTML = `
             <td>${prod.imageUrl ? `<img src="${prod.imageUrl}" alt="badge" style="height:30px; width:auto;">` : '-'}</td>
             <td>${prod.name}</td>
+            <td>${prod.category || '-'}</td>
+            <td>${prod.manufacturer || '-'}</td>
             <td>${fmtUSD(prod.unitPrice)}</td>
             <td>${status}</td>
-            <td>${prod.ownerEmail || '-'}</td>
             <td><button data-id="${prod.id}" class="primary" style="padding:4px 10px">Edit</button></td>`;
           tr.querySelector('button').addEventListener('click', () => editProduct(prod.id));
+          tr.addEventListener('click', () => setPreview(prod));
           productRows.appendChild(tr);
         });
       }
@@ -294,6 +402,8 @@
         selectedId = id;
         qs('#formTitle').textContent = prod ? `Edit: ${prod.name}` : 'Add Product';
         qs('#prodName').value = prod?.name || '';
+        qs('#prodCategory').value = prod?.category || '';
+        qs('#prodManufacturer').value = prod?.manufacturer || '';
         qs('#prodDescription').value = prod?.description || '';
         qs('#prodPrice').value = prod?.unitPrice || '';
         qs('#prodWarranty').value = prod?.warrantyText || '';
@@ -303,13 +413,17 @@
         qs('#prodImageUrl').value = prod?.imageUrl || '';
         qs('#prodApproved').checked = !!prod?.isApproved;
         qs('#prodCustom').checked = !!prod?.isCustom;
+        qs('#prodFortified').checked = !!prod?.isFortified;
         setFormStatus('');
+        setPreview(prod || null);
       }
 
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const payload = {
           name: qs('#prodName').value.trim(),
+          category: qs('#prodCategory').value.trim(),
+          manufacturer: qs('#prodManufacturer').value.trim(),
           description: qs('#prodDescription').value.trim(),
           unitPrice: parseFloat(qs('#prodPrice').value) || 0,
           warrantyText: qs('#prodWarranty').value.trim(),
@@ -319,6 +433,7 @@
           tags: qs('#prodTags').value.split(',').map(x => x.trim()).filter(Boolean),
           isApproved: qs('#prodApproved').checked,
           isCustom: qs('#prodCustom').checked,
+          isFortified: qs('#prodFortified').checked,
         };
         if(!payload.name){
           setFormStatus('Name is required.', true);
@@ -371,6 +486,7 @@
         form.reset();
         qs('#formTitle').textContent = 'Add Product';
         setFormStatus('');
+        setPreview(null);
       });
 
       const exportBtn = qs('#exportCsvBtn');
@@ -573,6 +689,13 @@
       loadProducts();
       loadDefaults();
       loadBranding();
+
+      const catSel = qs('#filterCategory');
+      const manSel = qs('#filterManufacturer');
+      const fortChk = qs('#filterFortified');
+      if(catSel){ catSel.addEventListener('change', () => { filters.category = catSel.value; renderTable(); }); }
+      if(manSel){ manSel.addEventListener('change', () => { filters.manufacturer = manSel.value; renderTable(); }); }
+      if(fortChk){ fortChk.addEventListener('change', () => { filters.fortified = fortChk.checked; renderTable(); }); }
     })();
   </script>
 </body>

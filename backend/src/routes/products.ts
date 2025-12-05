@@ -13,6 +13,9 @@ const productSchema = z.object({
   scopeBullets: z.array(z.string()).optional(),
   componentBullets: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
+  category: z.string().optional(),
+  manufacturer: z.string().optional(),
+  isFortified: z.boolean().optional(),
   imageUrl: z.string().optional().refine((val) => {
     if (!val) return true;
     return /^https?:\/\//i.test(val) || val.startsWith("data:");
