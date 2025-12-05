@@ -51,102 +51,208 @@ const products: Array<{
   isApproved?: boolean;
 }> = [
   {
-    name: "Fortified Asphalt Roof (GAF or Owens Corning)",
+    name: "Zuppardo’s Special – Atlas ProLam (Non-FORTIFIED)",
     category: "Roofing",
-    description: "FORTIFIED Timberline HDZ™ or Owens Corning Duration™ roof system with 50-year pledge and 15-year unlimited wind protection.",
-    unitPrice: 525,
-    warrantyText: "GAF Gold Pledge or Owens Corning Preferred Protection 50-year warranty plus lifetime workmanship from Zuppardo’s.",
-    scopeIntro: "Install a FORTIFIED architectural asphalt shingle roofing system covering {{TOTAL_SQUARES}} squares. Customer may select GAF Timberline HDZ™ or Owens Corning Duration™.",
+    description: "Zuppardo’s Special non-fortified Atlas ProLam shingle roofing system.",
+    unitPrice: 0,
+    warrantyText: "2-year material warranty and 2-year workmanship warranty from Zuppardo’s Renovations.",
+    scopeIntro: "Install the Zuppardo’s Special Atlas ProLam shingle roofing system covering {{TOTAL_SQUARES}} squares.",
     scopeBullets: [
       "Demo and remove all shingles and underlayment down to the bare decking.",
-      "Inspect and document decking conditions; coordinate any repair approvals before proceeding.",
-      "Furnish and install the fortified asphalt shingle system across {{TOTAL_SQUARES}} squares with full weatherproofing.",
-      "Coordinate with the FORTIFIED evaluator, upload photos, and manage paperwork until certification is issued.",
-      "Remove trash daily, haul debris with dump trailer, and magnet sweep the property.",
-      "Complete punch list items to the customer’s satisfaction."
+      "Perform a thorough inspection of the decking; replace the first two sheets at no charge and obtain signed change orders for any additional repairs.",
+      "Furnish and install an architectural asphalt shingle roofing system across {{TOTAL_SQUARES}} squares.",
+      "Remove all trash and debris from the property using our dump trailer.",
+      "Magnet sweep the property for nails, screws, and fasteners.",
+      "Complete all cleaning to the owner’s satisfaction."
     ],
     componentBullets: [
-      "Fully-adhered ice & water barrier (GAF WeatherWatch™) on the entire roof deck.",
-      "26-gauge drip edge fastened 4\" on center in a diagonal pattern around the roof perimeter.",
-      "New roof jacks (3-in-1 bases) at all penetrations.",
-      "Hip & ridge cap (GAF Seal-A-Ridge™) installed per manufacturer requirements.",
-      "Self-adhered starter (GAF QuickStart™) at eaves and rakes.",
-      "Ring-shank nails installed 4\" on center across every deck panel for uplift resistance.",
-      "Balanced attic ventilation with new vents matching existing style."
+      "Ice and water shield in valleys and around jacks, pipes, and chimneys.",
+      "Synthetic underlayment on the entire roof (Jefferson and Orleans Parish receive a double layer per parish standard).",
+      "New 26-gauge drip edge flashing on the entire roof.",
+      "New starters and new 3-in-1 roof jacks.",
+      "Atlas ProLam architectural shingles.",
+      "New ventilation (whirly birds, ridge vents, or power vents) with Atlas ventilation components.",
+      "Atlas Pro-Cut Hip & Ridge™ caps."
     ],
-    tags: ["roof", "fortified", "gaf", "owens-corning", "asphalt"]
+    tags: ["roof", "asphalt", "atlas", "non-fortified"]
   },
   {
-    name: "Fortified Owens Corning Preferred Protection",
+    name: "Atlas Pinnacle Pristine Designer (Non-FORTIFIED)",
     category: "Roofing",
-    description: "Owens Corning Duration™ roof system with Preferred Protection warranty and FORTIFIED detailing.",
+    description: "Non-fortified Atlas Pinnacle Pristine Designer shingle roofing system.",
     unitPrice: 0,
-    warrantyText: "Owens Corning 50-year Preferred Protection roof warranty plus Zuppardo’s lifetime workmanship coverage.",
-    scopeIntro: "Install a FORTIFIED Owens Corning Duration™ roof across {{TOTAL_SQUARES}} squares with 15-year wind protection.",
+    warrantyText: "Limited lifetime material warranty from Atlas Roofing and 5-year workmanship warranty from Zuppardo’s Renovations.",
+    scopeIntro: "Install a non-fortified Atlas Pinnacle Pristine Designer shingle roofing system covering {{TOTAL_SQUARES}} squares.",
     scopeBullets: [
-      "Remove existing shingles and underlayment down to the bare deck.",
-      "Inspect, re-nail, or replace decking; add new 1/2\" OSB with ring-shank fasteners where required.",
-      "Install the Owens Corning fortified system across {{TOTAL_SQUARES}} squares.",
-      "Coordinate with the FORTIFIED evaluator to submit documentation and photos for certification.",
-      "Clean up daily, haul debris, and magnet sweep driveways and lawns."
+      "Demo and remove all shingles and underlayment down to the bare decking.",
+      "Inspect the decking; replace the first two sheets at no charge and use signed change orders for additional repairs.",
+      "Furnish and install an architectural asphalt shingle roofing system across {{TOTAL_SQUARES}} squares.",
+      "Remove all trash and debris with our dump trailer.",
+      "Magnet sweep the property for any nails, screws, or fasteners.",
+      "Complete cleaning to the owner’s satisfaction."
     ],
     componentBullets: [
-      "Rhino™ ice & water shield across the entire deck.",
-      "26-gauge fortified drip edge nailed 4\" on center diagonally.",
-      "Owens Corning Pro Edge™, ProCut™, or Rizer Ridge hip & ridge accessories.",
-      "Owens Corning Starter Roll along eaves and rakes.",
-      "Ring-shank nails 4\" on center across the deck.",
-      "Replace all vents with Lomanco/Top Shield or matching systems."
+      "Ice and water shield in valleys and around jacks, pipes, and chimneys.",
+      "Synthetic underlayment on the entire roof (Jefferson and Orleans Parish receive a double layer per parish standard).",
+      "New 26-gauge drip edge flashing on the entire roof.",
+      "Atlas ProCut® HP42® starter shingles.",
+      "New 3-in-1 roof jacks.",
+      "Atlas Pinnacle Pristine Designer architectural shingles.",
+      "Atlas ventilation components and Atlas Pro-Cut Hip & Ridge™ caps."
     ],
-    tags: ["roof", "fortified", "owens-corning"]
+    tags: ["roof", "asphalt", "atlas", "non-fortified"]
   },
   {
-    name: "Standard Asphalt Roof – GAF 50-Year",
+    name: "GAF Timberline HDZ (Non-FORTIFIED)",
     category: "Roofing",
-    description: "Non-fortified Timberline HDZ™ Gold Pledge roof with full tear-off and cleanup.",
-    unitPrice: 500,
-    warrantyText: "GAF Gold Pledge 50-year material warranty plus lifetime workmanship from Zuppardo’s.",
-    scopeIntro: "Install a non-fortified GAF Timberline HDZ™ roof covering {{TOTAL_SQUARES}} squares with 15-year unlimited wind protection.",
-    scopeBullets: [
-      "Tear off shingles/underlayment down to the deck and inspect for hidden damage (3 sheets included at no cost).",
-      "Install the 50-year architectural shingle system across {{TOTAL_SQUARES}} squares.",
-      "Replace vents, flashings, and accessories as specified.",
-      "Remove debris, haul off-site, and magnet sweep the property.",
-      "Complete final cleaning to homeowner satisfaction."
-    ],
-    componentBullets: [
-      "Ice & water barrier (GAF WeatherWatch™ or StormGuard™) in valleys and around penetrations.",
-      "GAF FeltBuster™ synthetic underlayment over the entire roof.",
-      "New drip edge around the roof perimeter.",
-      "New 3-in-1 roof jacks and matching accessories.",
-      "Hip & ridge cap (GAF TimberTex™ or Seal-A-Ridge™).",
-      "Pro-Start™ starter shingles at eaves/rakes.",
-      "Replacement vents matching existing type."
-    ],
-    tags: ["roof", "gaf", "asphalt"]
-  },
-  {
-    name: "Standard Asphalt Roof – Owens Corning 50-Year",
-    category: "Roofing",
-    description: "Non-fortified Owens Corning Duration™ roof system.",
+    description: "Non-fortified GAF Timberline HDZ™ shingle roofing system.",
     unitPrice: 0,
-    warrantyText: "Owens Corning Duration™ 50-year warranty plus Zuppardo’s lifetime workmanship warranty.",
-    scopeIntro: "Install an Owens Corning Duration™ roof covering {{TOTAL_SQUARES}} squares with 15-year wind protection.",
+    warrantyText: "GAF Gold Pledge warranty with 50-year system coverage, 15-year wind protection, and 25-year workmanship warranty.",
+    scopeIntro: "Install a non-fortified GAF Timberline HDZ™ shingle roofing system covering {{TOTAL_SQUARES}} squares.",
     scopeBullets: [
-      "Remove existing shingles and underlayment down to the deck.",
-      "Inspect and address deck issues before installing the new system.",
-      "Install the Owens Corning system across {{TOTAL_SQUARES}} squares.",
-      "Clean up debris daily and magnet sweep the property."
+      "Demo and remove all shingles and underlayment down to the bare decking.",
+      "Inspect decking and replace the first two sheets at no charge; perform additional structural repairs via signed change orders.",
+      "Furnish and install an architectural asphalt shingle roofing system across {{TOTAL_SQUARES}} squares.",
+      "Remove all trash and debris from the property using our dump trailer.",
+      "Magnet sweep the property for nails, screws, and fasteners.",
+      "Complete cleaning to the owner’s satisfaction."
     ],
     componentBullets: [
-      "Rhino™ ice & water shield at critical areas.",
-      "New drip edge, roof jacks, and flashings.",
-      "Owens Corning Pro Edge™, Rizer Ridge™, or ProCut™ hip and ridge.",
-      "Owens Corning starter roll at eaves/rakes.",
-      "Ring-shank nails 4\" on center across the deck.",
-      "Replace all ventilation components."
+      "Ice and water shield in valleys and around jacks, pipes, and chimneys (GAF WeatherWatch™).",
+      "GAF FeltBuster™ synthetic underlayment over the entire roof (double layer in Jefferson and Orleans Parish per parish standard).",
+      "New 26-gauge drip edge flashing on the entire roof.",
+      "GAF Pro-Start™ starters at eaves and rakes.",
+      "New 3-in-1 roof jacks.",
+      "GAF Timberline HDZ™ architectural shingles.",
+      "New ventilation with GAF ventilation components and GAF Seal-A-Ridge™ hip and ridge caps."
     ],
-    tags: ["roof", "owens-corning", "asphalt"]
+    tags: ["roof", "asphalt", "gaf", "non-fortified"]
+  },
+  {
+    name: "Owens Corning Duration (Non-FORTIFIED)",
+    category: "Roofing",
+    description: "Non-fortified Owens Corning Duration™ shingle roofing system.",
+    unitPrice: 0,
+    warrantyText: "Owens Corning Preferred warranty and 10-year workmanship warranty from Owens Corning.",
+    scopeIntro: "Install a non-fortified Owens Corning Duration™ shingle roofing system covering {{TOTAL_SQUARES}} squares.",
+    scopeBullets: [
+      "Demo and remove all shingles and underlayment down to the bare decking.",
+      "Inspect decking and replace the first two sheets at no charge; additional underlying damage repaired only with a signed change order.",
+      "Furnish and install an architectural asphalt shingle roofing system across {{TOTAL_SQUARES}} squares.",
+      "Remove all trash and debris with our dump trailer.",
+      "Magnet sweep the property for nails, screws, and fasteners.",
+      "Complete cleaning to the owner’s satisfaction."
+    ],
+    componentBullets: [
+      "Ice and water shield in valleys and around jacks, pipes, and chimneys (Owens Corning RhinoRoof® or equivalent).",
+      "Owens Corning RhinoRoof® U20 synthetic underlayment on the entire roof (double layer in Jefferson and Orleans Parish per parish standard).",
+      "New drip edge flashing on the entire roof.",
+      "Owens Corning Starter Strip Plus™ starter shingles.",
+      "New 3-in-1 roof jacks.",
+      "Owens Corning Duration™ architectural shingles.",
+      "New ventilation and Owens Corning Pro Edge™ hip and ridge caps."
+    ],
+    tags: ["roof", "asphalt", "owens-corning", "non-fortified"]
+  },
+  {
+    name: "Atlas Pinnacle Pristine Designer (FORTIFIED)",
+    category: "Roofing",
+    description: "FORTIFIED Atlas Pinnacle Pristine Designer shingle roofing system.",
+    unitPrice: 0,
+    warrantyText: "Guaranteed FORTIFIED certificate, limited lifetime material warranty from Atlas Roofing, and 5-year workmanship warranty from Zuppardo’s Renovations.",
+    scopeIntro: "Install a FORTIFIED Atlas Pinnacle Pristine Designer shingle roofing system covering {{TOTAL_SQUARES}} squares.",
+    scopeBullets: [
+      "Demo and remove all shingles and underlayment down to the bare decking.",
+      "Inspect decking; replace the first two sheets free of charge and perform additional repairs only after a signed change order.",
+      "Furnish and install a FORTIFIED architectural asphalt shingle roofing system across {{TOTAL_SQUARES}} squares.",
+      "Coordinate with the FORTIFIED evaluator and provide all required photos and documentation to obtain certification.",
+      "Remove all trash and debris with our dump trailer, magnet sweep the property, and clean to the owner’s satisfaction."
+    ],
+    componentBullets: [
+      "Ring-shank nails 4 inches on center across the entire roof deck.",
+      "Ice and water membrane on the entire roof deck with bond-break as needed.",
+      "26-gauge FORTIFIED-standard drip edge flashing nailed 4 inches on center in a diagonal pattern.",
+      "Atlas Pro-Cut® Universal 9XR self-adhered starter roll.",
+      "New 3-in-1 roof jacks.",
+      "Atlas Pinnacle Pristine Designer architectural shingles.",
+      "Atlas ventilation components and Atlas Pro-Cut Hip & Ridge™ caps."
+    ],
+    tags: ["roof", "asphalt", "atlas", "fortified"]
+  },
+  {
+    name: "GAF Timberline HDZ (FORTIFIED)",
+    category: "Roofing",
+    description: "FORTIFIED GAF Timberline HDZ™ shingle roofing system with 50-year system warranty and 15-year unlimited wind protection.",
+    unitPrice: 0,
+    warrantyText: "Guaranteed FORTIFIED certificate, GAF Gold Pledge warranty, 15-year unlimited wind warranty, and 25-year workmanship warranty.",
+    scopeIntro: "Install a FORTIFIED GAF Timberline HDZ™ shingle roofing system covering {{TOTAL_SQUARES}} squares.",
+    scopeBullets: [
+      "Demo and remove all shingles and underlayment down to the bare decking.",
+      "Inspect decking; replace the first two sheets free of charge and obtain signed change orders for additional repairs.",
+      "Furnish and install a FORTIFIED architectural asphalt shingle roofing system across {{TOTAL_SQUARES}} squares.",
+      "Coordinate with the FORTIFIED evaluator and submit all necessary documentation and photos for certification.",
+      "Remove all trash and debris using our dump trailer, magnet sweep the property, and complete cleaning to the owner’s satisfaction."
+    ],
+    componentBullets: [
+      "Ring-shank nails 4 inches on center across the entire roof deck.",
+      "Ice and water membrane (GAF WeatherWatch™) on the entire roof deck with bond-break as needed.",
+      "26-gauge FORTIFIED-standard drip edge flashing nailed 4 inches on center in a diagonal pattern.",
+      "GAF QuickStart™ self-adhered starter.",
+      "New 3-in-1 roof jacks.",
+      "GAF Timberline HDZ™ architectural shingles.",
+      "New ventilation and GAF Seal-A-Ridge™ hip and ridge caps."
+    ],
+    tags: ["roof", "asphalt", "gaf", "fortified"]
+  },
+  {
+    name: "Zuppardo’s Special – Atlas ProLam (FORTIFIED)",
+    category: "Roofing",
+    description: "Zuppardo’s Special FORTIFIED Atlas ProLam shingle roofing system.",
+    unitPrice: 0,
+    warrantyText: "Guaranteed FORTIFIED certificate plus 2-year material and 2-year workmanship warranty from Zuppardo’s Renovations.",
+    scopeIntro: "Install the Zuppardo’s Special FORTIFIED Atlas ProLam shingle roofing system covering {{TOTAL_SQUARES}} squares.",
+    scopeBullets: [
+      "Demo and remove all shingles and underlayment down to the bare decking.",
+      "Inspect decking; replace the first two sheets at no charge and perform additional repairs only with a signed change order.",
+      "Furnish and install a FORTIFIED architectural asphalt shingle roofing system across {{TOTAL_SQUARES}} squares.",
+      "Coordinate with the FORTIFIED evaluator and submit required photos and documentation for certification.",
+      "Remove trash and debris with our dump trailer, magnet sweep the property, and clean to the owner’s satisfaction."
+    ],
+    componentBullets: [
+      "Ring-shank nails 4 inches on center across the entire roof deck.",
+      "Ice and water membrane on the entire roof deck with bond-break as needed.",
+      "26-gauge FORTIFIED-standard drip edge flashing nailed 4 inches on center in a diagonal pattern.",
+      "Self-adhered starter course for Atlas ProLam shingles.",
+      "New 3-in-1 roof jacks.",
+      "Atlas ProLam architectural shingles.",
+      "New ventilation and Atlas Pro-Cut Hip & Ridge™ caps."
+    ],
+    tags: ["roof", "asphalt", "atlas", "fortified"]
+  },
+  {
+    name: "Owens Corning Duration (FORTIFIED)",
+    category: "Roofing",
+    description: "FORTIFIED Owens Corning Duration™ shingle roofing system.",
+    unitPrice: 0,
+    warrantyText: "Guaranteed FORTIFIED certificate, Owens Corning Preferred warranty, and 10-year workmanship warranty from Owens Corning.",
+    scopeIntro: "Install a FORTIFIED Owens Corning Duration™ shingle roofing system covering {{TOTAL_SQUARES}} squares.",
+    scopeBullets: [
+      "Demo and remove all shingles and underlayment down to the bare decking.",
+      "Inspect decking; replace the first two sheets free of charge and complete additional repairs only with a signed change order.",
+      "Furnish and install a FORTIFIED architectural asphalt shingle roofing system across {{TOTAL_SQUARES}} squares.",
+      "Coordinate with the FORTIFIED evaluator and submit all necessary photos and documentation to obtain a FORTIFIED certificate.",
+      "Remove trash and debris with our dump trailer, magnet sweep the property, and complete cleaning to the owner’s satisfaction."
+    ],
+    componentBullets: [
+      "Ring-shank nails 4 inches on center across the entire roof deck.",
+      "Owens Corning Rhino™ ice and water membrane on the entire roof deck with bond-break as needed.",
+      "26-gauge FORTIFIED-standard drip edge flashing nailed 4 inches on center in a diagonal pattern.",
+      "Owens Corning self-adhered starter roll.",
+      "New 3-in-1 roof jacks.",
+      "Owens Corning Duration™ architectural shingles.",
+      "New ventilation and Owens Corning Pro Edge™ hip and ridge caps."
+    ],
+    tags: ["roof", "asphalt", "owens-corning", "fortified"]
   },
   {
     name: "Modified Bitumen Torch-Down Roof System",
