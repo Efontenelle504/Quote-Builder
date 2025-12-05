@@ -475,58 +475,11 @@
     'Daily cleanup and magnetic nail sweep; debris haul-off; final QA checklist with photos.'
   ];
 
-  const DEFAULT_PRODUCTS = {
-    'GAF Timberline HDZ (50-Year System Warranty)': {
-      unitPrice: 500,
-      warranty: 'GAF Gold Pledge Warranty: lifetime materials (50 years non-prorated), 25-year workmanship, 15-year wind warranty, algae resistance, and includes tear-off & disposal.',
-      comps: ['Use qualifying GAF components', 'Install Timberline HDZ shingles per GAF details'],
-      scope: ['Install qualifying GAF components for full system coverage', 'Timberline HDZ shingles installed following manufacturer requirements']
-    },
-    'Owens Corning Duration (Platinum Preferred Warranty)': {
-      unitPrice: 500,
-      warranty: 'Owens Corning Platinum Warranty: 50-year coverage on materials, labor, tear-off & disposal with 25-year workmanship protection, plus wind and algae protection.',
-      comps: ['Use qualifying Owens Corning components', 'Install Duration shingles per OC specifications'],
-      scope: ['Install qualifying Owens Corning components for full system coverage', 'Duration shingles installed per OC specifications']
-    },
-    'Standing Seam': {
-      unitPrice: 1350,
-      warranty: 'Manufacturer panel and paint warranties apply; includes lifetime workmanship warranty from Zuppardo’s.',
-      comps: ['Concealed-fastener standing-seam panels with clips & underlayment', 'Fabricate flashings, closures & sealants at perimeters & penetrations'],
-      scope: ['Install concealed-fastener standing-seam panels with approved clips/fasteners and hemmed eaves', 'Fabricate edge, wall, valley & ridge flashings with closures; allow for thermal movement']
-    },
-    'Unified Steel Granite Ridge (Stone-Coated Steel)': {
-      unitPrice: 1400,
-      warranty: 'Unified Steel Granite Ridge Warranty: 50-year property-based coverage with 20-year manufacturer workmanship; includes Zuppardo’s lifetime workmanship warranty.',
-      comps: ['Granite Ridge panels with trims & accessories', 'Underlayment, flashings, fasteners & ventilation per manufacturer'],
-      scope: ['Install Granite Ridge panels following manufacturer’s fastener schedule & coursing', 'Use approved trims, foam closures & accessories for sealed, wind-resistant assembly']
-    },
-    'R-Panel Metal Roofing': {
-      unitPrice: 700,
-      warranty: 'Manufacturer material & paint warranties apply; includes Zuppardo’s lifetime workmanship warranty.',
-      comps: ['Exposed-fastener R-panel with closures & sealants', 'Underlayment and flashings at all perimeters & penetrations'],
-      scope: ['Install exposed-fastener R-panels with specified fastener spacing & laps', 'Seal sidelaps & endlaps with sealant and closures at eaves, ridges & penetrations']
-    },
-    'Other': {
-      unitPrice: 0,
-      warranty: 'As specified; manufacturer warranties apply.',
-      comps: ['As specified'],
-      scope: []
-    }
-  };
-
   const slugify = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-  const DEFAULT_PRODUCT_LIST = Object.entries(DEFAULT_PRODUCTS).map(([name, data]) => ({
-    ...data,
-    name,
-    slug: slugify(name),
-    isDefault: true,
-    isCustom: false,
-    isApproved: true
-  }));
 
   const DEFAULT_DISCLAIMER_TEXT = 'This estimate is provided in good faith based on the information available at the time of preparation. This is not a contract. Final pricing and scope of work are subject to change pending an in-person inspection to verify conditions and identify any underlying structural issues, code requirements, or unforeseen circumstances that may require additional work. Any changes to the scope or price will be communicated and approved before work commences.';
 
-  let productMap = new Map(DEFAULT_PRODUCT_LIST.map((item) => [item.name, item]));
+  let productMap = new Map();
   let remoteProducts = [];
   let customProductList = [];
   let repOptions = [];
@@ -541,10 +494,10 @@
     qdate: today(),
     cust: { name:'', address:'', phone:'', email:'' },
     job:'',
-    sys:'GAF Timberline HDZ (50-Year System Warranty)',
-    systemSlug: slugify('GAF Timberline HDZ (50-Year System Warranty)'),
+    sys:'',
+    systemSlug:'',
     applyPreset:true,
-    areas:[ { id:1, name:'Main roof', squares:0, unitPrice: DEFAULT_PRODUCTS['GAF Timberline HDZ (50-Year System Warranty)'].unitPrice, include:true } ],
+    areas:[ { id:1, name:'Main roof', squares:0, unitPrice: 0, include:true } ],
     deck:{ include:false, estSheets:0, sheetPrice:85, freeSheets:5 },
     disc:{ enabled:false, percent:0 },
     showAltPly:true,
@@ -630,7 +583,10 @@
       const res = await fetch('/api/products?includeUnapproved=true');
       if(!res.ok) throw new Error('Unable to load products');
       const data = await res.json();
-      remoteProducts = (Array.isArray(data) ? data : []).map(normalizeProduct);
+      // Use only products from API; filter to Roofing category by default
+      remoteProducts = (Array.isArray(data) ? data : [])
+        .map(normalizeProduct)
+        .filter(p => !p.category || p.category.toLowerCase() === 'roofing');
       rebuildProductMap();
       updateSystemSelect();
       renderCustomProducts();
@@ -1307,6 +1263,8 @@
       select.value = options[0].name;
       state.sys = options[0].name;
       state.systemSlug = options[0].slug;
+      // Apply preset unit price to existing areas
+      state.areas = state.areas.map(a => ({ ...a, unitPrice: options[0].unitPrice || 0 }));
     }
   }
 
