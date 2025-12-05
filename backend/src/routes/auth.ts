@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { config } from "../lib/config";
 import { prisma } from "../lib/prisma";
-import { issueToken, rateLimitAuth } from "../middleware/auth";
+import { authMiddleware, issueToken, rateLimitAuth } from "../middleware/auth";
 import bcrypt from "bcryptjs";
 
 const router = Router();
@@ -59,10 +59,14 @@ router.post("/logout", (_req, res) => {
   res.json({ message: "Logged out" });
 });
 
-router.get("/me", (req, res) => {
-  const user = (req as any).user;
-  if (!user) return res.status(401).json({ message: "Unauthorized" });
-  res.json({ id: user.id, role: user.role });
-});
+router.get(
+  "/me",
+  authMiddleware,
+  (req, res) => {
+    const user = (req as any).user;
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
+    res.json({ id: user.id, role: user.role });
+  }
+);
 
 export default router;

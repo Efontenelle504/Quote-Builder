@@ -34,9 +34,8 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/auth", authRouter);
 
-// Protect all other /api routes
-app.use("/api", authMiddleware);
-app.use("/api/admin/users", adminUsersRouter);
+// Temporarily only protect admin user management; leave other APIs open.
+app.use("/api/admin/users", authMiddleware, adminUsersRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/quotes", quotesRouter);
 app.use("/api/crm", crmRouter);
