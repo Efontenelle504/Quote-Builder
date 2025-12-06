@@ -58,6 +58,7 @@
   document.head.appendChild(style);
 
   const currentPath = location.pathname.replace(/\/+$/, "") || "/";
+  if (!document.body) return;
 
   const linkDefs = [
     { href: "/final_quote_builder.html", label: "Quote Builder" },
@@ -89,11 +90,7 @@
     linksContainer.appendChild(a);
   });
 
-  const first = document.body.firstChild;
-  if (first) {
-    document.body.insertBefore(nav, first);
-  } else {
-    document.body.appendChild(nav);
-  }
+  const first = document.body ? document.body.firstChild : null;
+  if (first) document.body.insertBefore(nav, first);
+  else document.body.appendChild(nav);
 })();
-

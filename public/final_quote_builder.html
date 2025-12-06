@@ -1167,7 +1167,8 @@
   function addArea(){
     const nextId = state.areas.length ? state.areas[state.areas.length-1].id + 1 : 1;
     const preset = getActivePreset();
-    state.areas.push({ id: nextId, name: `Area ${nextId}`, squares: 0, unitPrice: preset.unitPrice, include: true });
+    const unitPrice = (preset && typeof preset.unitPrice === 'number') ? preset.unitPrice : 0;
+    state.areas.push({ id: nextId, name: `Area ${nextId}`, squares: 0, unitPrice, include: true });
     save(); renderAreas(); render();
   }
   // Remove area by id
@@ -1188,7 +1189,7 @@
           <div class="row row-3">
             <label>Area Name<input value="${area.name}" /></label>
             <label>Squares<input type="number" step="0.01" min="0" value="${area.squares}" /></label>
-            <label>Unit Price ($/sq)<input type="number" step="1" min="0" value="${area.unitPrice}" /></label>
+            <label>Unit Price ($/sq)<input type="number" step="1" min="0" value="${area.unitPrice || 0}" /></label>
           </div>
           <div class="flex" style="justify-content:space-between; align-items:center; margin-top:8px">
             <label class="flex" style="gap:4px"><input type="checkbox" ${area.include ? 'checked' : ''}/> Include</label>
