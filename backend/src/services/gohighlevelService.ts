@@ -58,6 +58,24 @@ class GoHighLevelService {
     };
   }
 
+  async healthCheck() {
+    if (!this.enabled) {
+      return { ok: false, message: "GOHIGHLEVEL_API_KEY not set" };
+    }
+    try {
+      const params = new URLSearchParams({ limit: "1" });
+      if (config.goHighLevel.locationId) {
+        params.append("locationId", config.goHighLevel.locationId);
+      }
+      await this.client.get(`/contacts?${params.toString()}`, { headers: this.headers });
+      return { ok: true };
+    } catch (err) {
+      const e = err as any;
+      const status = e?.response?.status;
+      return { ok: false, status, message: unwrapErrorMessage(err) };
+    }
+  }
+
   private async getContactById(id: string) {
     if (!this.enabled) return null;
     try {
