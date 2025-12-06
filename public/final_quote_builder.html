@@ -587,9 +587,28 @@
   }
 
   function rebuildProductMap(){
-    productMap = new Map(DEFAULT_PRODUCT_LIST.map((item) => [item.name, item]));
+    // Build map from whatever we have; no dependency on baked-in defaults
+    productMap = new Map();
     remoteProducts.forEach((prod) => productMap.set(prod.name, prod));
     customProductList = remoteProducts.filter((prod) => prod.isCustom);
+    // If nothing came back, seed a minimal fallback so UI still works
+    if(productMap.size === 0){
+      const fallback = {
+        name: 'Standard System',
+        slug: 'standard-system',
+        unitPrice: 0,
+        warranty: 'As specified; manufacturer warranties apply.',
+        comps: [],
+        scope: [],
+        scopeIntro: '',
+        productId: null,
+        isCustom: false,
+        isApproved: true,
+        ownerEmail: '',
+        createdBy: ''
+      };
+      productMap.set(fallback.name, fallback);
+    }
   }
 
   async function fetchDefaults(){
@@ -612,7 +631,8 @@
 
   async function fetchProducts(){
     try{
-      const res = await fetch('/api/products?includeUnapproved=true');
+      // Older backend may not accept includeUnapproved; fall back gracefully
+      const res = await fetch('/api/products');
       if(!res.ok) throw new Error('Unable to load products');
       const data = await res.json();
       // Use only products from API; filter to Roofing category by default
@@ -632,6 +652,11 @@
       updatePreset();
     }catch(err){
       console.warn('Unable to load product catalog', err);
+      // fallback to defaults if API fails
+      rebuildProductMap();
+      updateSystemSelect();
+      renderCustomProducts();
+      updatePreset();
     }
   }
 
