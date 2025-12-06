@@ -41,6 +41,11 @@
   .card[open] > summary { border-bottom: none; }
   .card .content { padding: 12px; }
   @media (min-width: 768px) { .card .content { padding: 16px; } }
+  .steps { display:flex; gap:8px; flex-wrap:wrap; padding:8px 12px; }
+  .step-pill { padding:6px 10px; border-radius:999px; border:1px solid var(--border); background:#fff; font-weight:600; font-size:13px; color:var(--muted); }
+  .step-pill.active { background: var(--brand); color:#fff; border-color: var(--brand); }
+  .step-pane { display:none; }
+  .step-pane.active { display:block; }
   .row { display: grid; gap: 12px; }
   @media (min-width: 640px) { .row-2 { grid-template-columns: 1fr 1fr; } .row-3 { grid-template-columns: 2fr 1fr 1fr; } }
   label { display: block; font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
@@ -173,6 +178,12 @@
   <div class="wrap grid">
     <!-- Left column: inputs -->
     <section>
+      <div class="steps">
+        <span class="step-pill" data-step-pill="1">Step 1: Customer & Rep</span>
+        <span class="step-pill" data-step-pill="2">Step 2: System & Areas</span>
+        <span class="step-pill" data-step-pill="3">Step 3: Options & Review</span>
+      </div>
+      <div class="step-pane" data-step="1">
       <details class="card" open>
         <summary>Company & Rep</summary>
         <div class="content">
@@ -222,6 +233,8 @@
           </div>
         </div>
       </details>
+      </div>
+      <div class="step-pane" data-step="2">
       <details class="card" open>
         <summary>System & Pricing</summary>
         <div class="content">
@@ -265,6 +278,8 @@
           <div id="areas"></div>
         </div>
       </details>
+      </div>
+      <div class="step-pane" data-step="3">
       <details class="card" open>
         <summary>Adders & Options</summary>
         <div class="content">
@@ -308,6 +323,11 @@
           <textarea id="scopeOverride" rows="4" placeholder="Add project-specific notes, alternates, inclusions/exclusions. These will appear in the quote."></textarea>
         </div>
       </details>
+      </div>
+      <div style="display:flex; justify-content:space-between; gap:8px; margin:12px 0;">
+        <button id="prevStep" type="button">Back</button>
+        <button id="nextStep" type="button" class="primary">Next</button>
+      </div>
     </section>
     <!-- Right column: preview -->
     <section>
@@ -489,6 +509,7 @@
   let customProductList = [];
   let repOptions = [];
   let aiModalState = null;
+  let currentStep = 1;
 
   // State
   const state = {
@@ -678,6 +699,27 @@
     .split('\n')
     .map(line => line.trim())
     .filter(Boolean);
+
+  function updateStepUI(){
+    $$('.step-pane').forEach(p => {
+      p.classList.toggle('active', Number(p.getAttribute('data-step')) === currentStep);
+    });
+    $$('.step-pill').forEach(p => {
+      p.classList.toggle('active', Number(p.getAttribute('data-step-pill')) === currentStep);
+    });
+    const prev = $('#prevStep');
+    const next = $('#nextStep');
+    if(prev) prev.disabled = currentStep === 1;
+    if(next){
+      if(currentStep === 3){
+        next.textContent = 'Save Quote';
+        next.onclick = () => saveQuote({ sync: false });
+      } else {
+        next.textContent = 'Next';
+        next.onclick = () => { currentStep = Math.min(3, currentStep+1); updateStepUI(); };
+      }
+    }
+  }
 
   function buildQuotePayload(sync){
     const scopeOverride = $('#scopeOverride').value.trim();
@@ -1578,6 +1620,11 @@
       syncBoundInputs();
       save(); render();
     });
+
+    // Step nav
+    updateStepUI();
+    $('#prevStep').addEventListener('click', () => { currentStep = Math.max(1, currentStep-1); updateStepUI(); });
+    $('#nextStep').addEventListener('click', () => { currentStep = Math.min(3, currentStep+1); updateStepUI(); });
   }
 
   // Inline editing

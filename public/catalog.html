@@ -46,6 +46,11 @@
     .color-chip { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; background: #fff; }
     .color-chip span { font-weight: 600; }
     .swatch { width: 32px; height: 32px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); }
+    .import-box { border:1px dashed var(--border); padding:12px; border-radius:10px; background:#fff; }
+    .import-box h4 { margin:0 0 8px 0; }
+    .import-preview { max-height:220px; overflow:auto; border:1px solid var(--border); border-radius:8px; margin-top:8px; }
+    .import-preview table { width:100%; border-collapse:collapse; font-size:12px; }
+    .import-preview th, .import-preview td { padding:6px; border-bottom:1px solid var(--border); }
     @media (min-width: 900px) {
       .wrap { grid-template-columns: 2fr 1fr; }
       .wrap .card:nth-child(3) { grid-column: 1 / span 2; }
@@ -196,6 +201,21 @@
       </div>
       <button class="primary" id="saveBrandingBtn" style="margin-top:12px;">Save Branding</button>
       <div id="brandingStatus" class="muted"></div>
+    </section>
+    <section class="card">
+      <h3>CSV Import (dry run)</h3>
+      <div class="import-box">
+        <h4>Preview CSV before importing</h4>
+        <p class="muted">Upload a CSV with headers: id, name, category, manufacturer, unitPrice, warrantyText, scopeIntro, scopeBullets, componentBullets, tags, imageUrl, isCustom, isApproved, ownerEmail, isFortified. Scope/Components separated by " | ", tags by ";". This is a preview only; no data is saved.</p>
+        <input type="file" id="importFile" accept=".csv,text/csv" />
+        <div id="importStatus" class="muted" style="margin-top:6px;"></div>
+        <div class="import-preview" id="importPreview" style="display:none;">
+          <table>
+            <thead id="importHead"></thead>
+            <tbody id="importBody"></tbody>
+          </table>
+        </div>
+      </div>
     </section>
   </div>
   <div class="ai-modal-backdrop" id="productAiModal">
@@ -683,6 +703,67 @@
         const result = productAiState.result || { text: qs('#productAiTextarea').value.trim() };
         target.apply(result);
         closeProductAiModal();
+      }
+
+      // CSV import preview (dry run)
+      let importRows = [];
+      function parseCsv(text){
+        const lines = text.split(/\r?\n/).filter(Boolean);
+        if(!lines.length) return [];
+        const headers = lines[0].split(',').map(h => h.trim());
+        return lines.slice(1).map(line => {
+          const cells = line.split(',');
+          const row = {};
+          headers.forEach((h,i) => row[h] = cells[i] ? cells[i].trim() : '');
+          return row;
+        });
+      }
+
+      function renderImportPreview(){
+        const head = qs('#importHead');
+        const body = qs('#importBody');
+        const preview = qs('#importPreview');
+        if(!importRows.length){
+          preview.style.display = 'none';
+          return;
+        }
+        const headers = Object.keys(importRows[0] || {});
+        head.innerHTML = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+        body.innerHTML = '';
+        importRows.slice(0,20).forEach(r => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = headers.map(h => `<td>${r[h] || ''}</td>`).join('');
+          body.appendChild(tr);
+        });
+        preview.style.display = 'block';
+      }
+
+      const importFile = qs('#importFile');
+      if(importFile){
+        importFile.addEventListener('change', () => {
+          const file = importFile.files?.[0];
+          const status = qs('#importStatus');
+          if(!file){
+            status.textContent = 'No file selected.';
+            importRows = [];
+            renderImportPreview();
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = () => {
+            try{
+              importRows = parseCsv(String(reader.result || ''));
+              status.textContent = `Previewing ${importRows.length} rows (first 20 shown). No data has been imported.`;
+              renderImportPreview();
+            }catch(err){
+              status.textContent = 'Unable to parse CSV.';
+              importRows = [];
+              renderImportPreview();
+            }
+          };
+          reader.onerror = () => { status.textContent = 'Unable to read file.'; };
+          reader.readAsText(file);
+        });
       }
 
       wireImageUpload();
