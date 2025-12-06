@@ -35,6 +35,7 @@ model Product {
   isFortified      Boolean  @default(false)
   description      String?
   unitPrice        Decimal? @db.Decimal(10, 2)
+  grantDelta       Decimal? @db.Decimal(10, 2) @default(0)
   warrantyText     String?
   scopeIntro       String?
   scopeBullets     Json?

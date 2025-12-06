@@ -307,6 +307,12 @@
                 <label>Sheet Price<input type="number" data-bind="deck.sheetPrice" min="0" /></label>
                 <label>Free Sheets<input type="number" data-bind="deck.freeSheets" min="0" /></label>
               </div>
+              <label class="flex" style="align-items:center; gap:6px">
+                <input type="checkbox" data-bind="grant.enabled" /> Grant program pricing
+              </label>
+              <div class="row row-3" id="grantRow" style="display:none">
+                <label>Grant price delta ($/sq)<input type="number" data-bind="grant.delta" step="1" /></label>
+              </div>
               <label class="flex"><input type="checkbox" data-bind="disc.enabled" /> Apply discount (%)</label>
               <div id="discRow" class="row row-3" style="display:none">
                 <label>Discount %<input type="number" data-bind="disc.percent" min="0" max="100" step="0.1" /></label>
@@ -388,7 +394,7 @@
         <section>
           <h4>Warranties <button class="ai-btn" data-ai-target="warranty">AI Rewrite</button></h4>
           <ul id="pWarrantyList">
-            <li>Lifetime workmanship – Zuppardo's Renovations LLC</li>
+            <!-- Workmanship warranty will be injected dynamically -->
             <li id="pWarrantyLine" data-edit="warrantyOverride"></li>
           </ul>
         </section>
@@ -544,7 +550,8 @@
     pricingText:'',
     altPlyText:'',
     showDisclaimer:false,
-    disclaimerText: DEFAULT_DISCLAIMER_TEXT
+    disclaimerText: DEFAULT_DISCLAIMER_TEXT,
+    grant: { enabled:false, delta:0 }
   };
 
   // Load from localStorage
@@ -573,6 +580,7 @@
       name: product.name,
       slug: product.slug || slugify(product.name),
       unitPrice: Number(product.unitPrice || 0),
+      grantDelta: Number(product.grantDelta || 0),
       warranty: product.warrantyText || 'As specified; manufacturer warranties apply.',
       comps: Array.isArray(product.componentBullets) ? product.componentBullets : [],
       scope: Array.isArray(product.scopeBullets) ? product.scopeBullets : [],
@@ -597,6 +605,7 @@
         name: 'Standard System',
         slug: 'standard-system',
         unitPrice: 0,
+        grantDelta: 0,
         warranty: 'As specified; manufacturer warranties apply.',
         comps: [],
         scope: [],
@@ -1374,9 +1383,11 @@
 
   // Calculate totals and lines
   function calculate(){
+    const grantDelta = (state.grant && state.grant.enabled) ? Number(state.grant.delta || 0) : 0;
     const rows = state.areas.map(a => {
       const sq = ceilSq(a.squares);
-      return { id:a.id, name:a.name, sq, include:a.include, line: a.include ? sq * (a.unitPrice || 0) : 0 };
+      const unit = (a.unitPrice || 0) + grantDelta;
+      return { id:a.id, name:a.name, sq, include:a.include, line: a.include ? sq * unit : 0 };
     });
     const totalSq = rows.filter(r=>r.include).reduce((s,r)=> s + r.sq, 0);
     const areaSubtotal = rows.filter(r=>r.include).reduce((s,r)=> s + r.line, 0);
@@ -1448,7 +1459,9 @@
       componentLines.map(line => `<li>${line}</li>`).join('') +
       '</ul>';
     // Warranties
-    const warranty = state.warrantyOverride && state.warrantyOverride.trim() ? state.warrantyOverride : (preset.warranty || 'As specified');
+    const warranty = state.warrantyOverride && state.warrantyOverride.trim()
+      ? state.warrantyOverride
+      : (preset.warranty || 'As specified');
     $('#pWarrantyLine').textContent = warranty;
     // Disclaimer
     if(state.showDisclaimer){
@@ -1553,8 +1566,9 @@
     componentLines.forEach((c,i) => lines.push(String.fromCharCode(65+i) + ') ' + c));
     lines.push('');
     lines.push('WARRANTIES');
-    lines.push('• Lifetime workmanship warranty – Zuppardo\'s Renovations LLC');
-    const warranty = state.warrantyOverride && state.warrantyOverride.trim() ? state.warrantyOverride : ((preset && preset.warranty) || 'As specified');
+    const warranty = state.warrantyOverride && state.warrantyOverride.trim()
+      ? state.warrantyOverride
+      : ((preset && preset.warranty) || 'As specified');
     lines.push('• ' + warranty);
     if(state.showDisclaimer){
       lines.push('');
@@ -1592,6 +1606,9 @@
   function updatePreset(){
     const preset = getActivePreset();
     state.systemSlug = (preset && preset.slug) ? preset.slug : slugify(state.sys || '');
+    if (preset && typeof preset.grantDelta === 'number') {
+      state.grant.delta = preset.grantDelta;
+    }
     state.pricingText = '';
     if(!state.applyPreset || !preset) {
       save();
@@ -1636,6 +1653,14 @@
         $('#deckRow').style.display = e.target.checked ? 'grid' : 'none';
       });
       $('#deckRow').style.display = state.deck.include ? 'grid' : 'none';
+    }
+    // Grant toggle
+    const grantToggle = $('[data-bind="grant.enabled"]');
+    if(grantToggle){
+      grantToggle.addEventListener('change', e => {
+        $('#grantRow').style.display = e.target.checked ? 'grid' : 'none';
+      });
+      $('#grantRow').style.display = state.grant && state.grant.enabled ? 'grid' : 'none';
     }
     // Discount toggle
     const discToggle = $('[data-bind="disc.enabled"]');

@@ -6,6 +6,7 @@ export interface ProductInput {
   name: string;
   description?: string;
   unitPrice?: number;
+  grantDelta?: number;
   warrantyText?: string;
   scopeIntro?: string;
   scopeBullets?: string[];
@@ -52,6 +53,7 @@ export const productService = {
       data: {
         ...input,
         slug,
+        grantDelta: input.grantDelta ?? 0,
         scopeBullets: input.scopeBullets ?? [],
         componentBullets: input.componentBullets ?? [],
         tags: input.tags ?? [],
@@ -71,6 +73,7 @@ export const productService = {
       data: {
         ...input,
         slug,
+        grantDelta: input.grantDelta ?? 0,
         scopeBullets: input.scopeBullets ?? [],
         componentBullets: input.componentBullets ?? [],
         tags: input.tags ?? [],

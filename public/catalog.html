@@ -104,6 +104,7 @@
               <th>Category</th>
               <th>Manufacturer</th>
               <th>Unit Price</th>
+              <th>Grant Δ ($/sq)</th>
               <th>Status</th>
               <th></th>
             </tr>
@@ -120,6 +121,7 @@
         <label>Manufacturer<input id="prodManufacturer" placeholder="Atlas, GAF, Owens Corning..." /></label>
         <label>Description<textarea id="prodDescription"></textarea></label>
         <label>Unit Price ($/sq)<input id="prodPrice" type="number" min="0" step="1" /></label>
+        <label>Grant price delta ($/sq)<input id="prodGrant" type="number" step="1" /></label>
         <label>Badge / Image URL<input id="prodImageUrl" placeholder="https://... (or will be filled from upload)" /></label>
         <label>Upload Badge (diamond/logo for chart)
           <input id="prodImageFile" type="file" accept="image/*" />
@@ -149,6 +151,7 @@
         <div class="muted" id="prevMeta"></div>
         <div style="margin-top:8px;" id="prevDesc"></div>
         <div style="margin-top:8px; font-weight:600;">Unit Price: <span id="prevPrice"></span></div>
+        <div style="margin-top:4px;" class="muted">Grant delta: <span id="prevGrant"></span></div>
         <div style="margin-top:12px;">
           <div style="font-weight:600;">Scope Intro</div>
           <div id="prevScopeIntro" class="muted"></div>
@@ -310,6 +313,7 @@
         qs('#prevMeta').textContent = [prod.category, prod.manufacturer, prod.isFortified ? 'FORTIFIED' : ''].filter(Boolean).join(' • ');
         qs('#prevDesc').textContent = prod.description || '';
         qs('#prevPrice').textContent = fmtUSD(prod.unitPrice || 0);
+        qs('#prevGrant').textContent = fmtUSD(prod.grantDelta || 0);
         qs('#prevScopeIntro').textContent = prod.scopeIntro || '';
         const scopeList = qs('#prevScopeList'); scopeList.innerHTML = '';
         (Array.isArray(prod.scopeBullets) ? prod.scopeBullets : []).forEach(line => {
@@ -350,7 +354,7 @@
 
       async function loadProducts(){
         try{
-          const res = await fetch('/api/products?includeUnapproved=true');
+          const res = await fetch('/api/products');
           const data = await res.json();
           products = Array.isArray(data) ? data : [];
           populateFilterOptions();
@@ -411,6 +415,7 @@
             <td>${prod.category || '-'}</td>
             <td>${prod.manufacturer || '-'}</td>
             <td>${fmtUSD(prod.unitPrice)}</td>
+            <td>${fmtUSD(prod.grantDelta || 0)}</td>
             <td>${status}</td>
             <td><button data-id="${prod.id}" class="primary" style="padding:4px 10px">Edit</button></td>`;
           tr.querySelector('button').addEventListener('click', () => editProduct(prod.id));
@@ -428,6 +433,7 @@
         qs('#prodManufacturer').value = prod?.manufacturer || '';
         qs('#prodDescription').value = prod?.description || '';
         qs('#prodPrice').value = prod?.unitPrice || '';
+        qs('#prodGrant').value = prod?.grantDelta || '';
         qs('#prodWarranty').value = prod?.warrantyText || '';
         qs('#prodScope').value = Array.isArray(prod?.scopeBullets) ? prod.scopeBullets.join('\n') : '';
         qs('#prodComponents').value = Array.isArray(prod?.componentBullets) ? prod.componentBullets.join('\n') : '';
@@ -448,6 +454,7 @@
           manufacturer: qs('#prodManufacturer').value.trim(),
           description: qs('#prodDescription').value.trim(),
           unitPrice: parseFloat(qs('#prodPrice').value) || 0,
+          grantDelta: parseFloat(qs('#prodGrant').value) || 0,
           warrantyText: qs('#prodWarranty').value.trim(),
           imageUrl: qs('#prodImageUrl').value.trim(),
           scopeBullets: qs('#prodScope').value.split('\n').map(x => x.trim()).filter(Boolean),
