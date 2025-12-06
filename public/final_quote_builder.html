@@ -179,11 +179,11 @@
     <!-- Left column: inputs -->
     <section>
       <div class="steps">
-        <span class="step-pill" data-step-pill="1">Step 1: Customer & Rep</span>
+        <span class="step-pill active" data-step-pill="1">Step 1: Customer & Rep</span>
         <span class="step-pill" data-step-pill="2">Step 2: System & Areas</span>
         <span class="step-pill" data-step-pill="3">Step 3: Options & Review</span>
       </div>
-      <div class="step-pane" data-step="1">
+      <div class="step-pane active" data-step="1">
       <details class="card" open>
         <summary>Company & Rep</summary>
         <div class="content">
@@ -707,6 +707,7 @@
     $$('.step-pill').forEach(p => {
       p.classList.toggle('active', Number(p.getAttribute('data-step-pill')) === currentStep);
     });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const prev = $('#prevStep');
     const next = $('#nextStep');
     if(prev) prev.disabled = currentStep === 1;
