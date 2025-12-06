@@ -1645,6 +1645,15 @@
     updateStepUI();
     $('#prevStep').addEventListener('click', () => { currentStep = Math.max(1, currentStep-1); updateStepUI(); });
     $('#nextStep').addEventListener('click', () => { currentStep = Math.min(3, currentStep+1); updateStepUI(); });
+    $$('.step-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const step = Number(pill.getAttribute('data-step-pill'));
+        if(step && step >=1 && step <=3){
+          currentStep = step;
+          updateStepUI();
+        }
+      });
+    });
   }
 
   // Inline editing
