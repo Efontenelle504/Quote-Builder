@@ -510,6 +510,12 @@
   let repOptions = [];
   let aiModalState = null;
   let currentStep = 1;
+  const FALLBACK_REPS = [
+    { id:'fallback-ross', name:'Ross Heffner', phone:'+15042857707', email:'' },
+    { id:'fallback-eric', name:'Eric Fontenelle', phone:'+15042857707', email:'eric@zuppardosrenovations.com' },
+    { id:'fallback-john', name:'John Zuppardo', phone:'+15042857707', email:'john@zuppardosrenovations.com' },
+    { id:'fallback-sam', name:'Sam Capeliano', phone:'+5044600830', email:'sam@zuppardosrenovations.com' },
+  ];
 
   // State
   const state = {
@@ -662,7 +668,9 @@
       const res = await fetch('/api/sales-reps');
       if(!res.ok) throw new Error('Unable to load reps');
       const data = await res.json();
-      repOptions = Array.isArray(data) ? data.filter((rep) => rep.active !== false) : [];
+      repOptions = Array.isArray(data) && data.length
+        ? data.filter((rep) => rep.active !== false)
+        : FALLBACK_REPS;
       const select = $('#repSelect');
       if(select){
         const current = state.repId;
@@ -679,6 +687,17 @@
       }
     }catch(err){
       console.warn('Unable to load reps', err);
+      repOptions = FALLBACK_REPS;
+      const select = $('#repSelect');
+      if(select){
+        select.innerHTML = '<option value=\"\">Select a rep…</option>';
+        repOptions.forEach(rep => {
+          const opt = document.createElement('option');
+          opt.value = rep.id;
+          opt.textContent = rep.name;
+          select.appendChild(opt);
+        });
+      }
     }
   }
 
