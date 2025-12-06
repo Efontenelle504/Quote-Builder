@@ -14,7 +14,7 @@ import { ensureStorageDir } from "./lib/files";
 import authRouter from "./routes/auth";
 import adminUsersRouter from "./routes/adminUsers";
 import crmHealthRouter from "./routes/crmHealth";
-import { authMiddleware, secureHeaders } from "./middleware/auth";
+import { secureHeaders } from "./middleware/auth";
 
 const app = express();
 
@@ -36,8 +36,8 @@ app.get("/health", (_req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/crm/health", crmHealthRouter);
 
-// Temporarily only protect admin user management; leave other APIs open.
-app.use("/api/admin/users", authMiddleware, adminUsersRouter);
+// Auth disabled for now so all routes are open (including admin users).
+app.use("/api/admin/users", adminUsersRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/quotes", quotesRouter);
 app.use("/api/crm", crmRouter);
