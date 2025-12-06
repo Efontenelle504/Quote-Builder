@@ -1338,9 +1338,12 @@
   function getActivePreset(){
     const sysName = state.sys;
     if(productMap.has(sysName)){
-      return productMap.get(sysName);
+      return productMap.get(sysName) || {};
     }
-    return productMap.values().next().value || DEFAULT_PRODUCT_LIST[0];
+    const first = productMap.values().next();
+    if(!first.done && first.value) return first.value;
+    // never return null/undefined
+    return {};
   }
 
   // Calculate totals and lines
