@@ -175,6 +175,7 @@
       <h3>Template Defaults</h3>
       <label>Default Scope Bullets<textarea id="defaultScope"></textarea></label>
       <label>Default Disclaimer<button type="button" class="ai-btn-inline" data-product-ai="default-warranty">AI Rewrite</button><textarea id="defaultDisclaimer" rows="4"></textarea></label>
+      <label>Default Workmanship Warranty<textarea id="defaultWorkWarranty" rows="2" placeholder="e.g., 5-year workmanship warranty – Zuppardo's Renovations LLC"></textarea></label>
       <button class="primary" id="saveDefaultsBtn" style="margin-top:12px;">Save Defaults</button>
       <div id="defaultsStatus" class="muted"></div>
     </section>
@@ -366,6 +367,7 @@
           const data = await res.json();
           qs('#defaultScope').value = (data.scopeBullets || []).join('\n');
           qs('#defaultDisclaimer').value = data.disclaimer || '';
+          qs('#defaultWorkWarranty').value = data.workmanshipWarranty || '';
           if(data.company){
             qs('#brandName').value = data.company.companyName || data.company.name || '';
             qs('#brandAddress').value = data.company.address || '';
@@ -519,11 +521,12 @@
       qs('#saveDefaultsBtn').addEventListener('click', async () => {
         const scope = qs('#defaultScope').value.split('\n').map(x => x.trim()).filter(Boolean);
         const disclaimer = qs('#defaultDisclaimer').value.trim();
+        const workmanshipWarranty = qs('#defaultWorkWarranty').value.trim();
         try{
           const res = await fetch('/api/settings/defaults', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ scopeBullets: scope, disclaimer })
+            body: JSON.stringify({ scopeBullets: scope, disclaimer, workmanshipWarranty })
           });
           if(!res.ok) throw new Error('Unable to save defaults.');
           setDefaultsStatus('Defaults saved.');

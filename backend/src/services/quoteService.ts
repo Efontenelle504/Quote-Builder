@@ -12,7 +12,7 @@ import { createQuotePdf, QuotePdfPayload } from "./pdfService";
 const FORTIFIED_BULLET =
   "We guarantee the installation will be approved once evaluated by an independent FORTIFIED evaluator.";
 
-const WORKMANSHIP_WARRANTY = "Lifetime workmanship warranty – Zuppardo's Renovations LLC";
+const DEFAULT_WORKMANSHIP_WARRANTY = "5-year workmanship warranty – Zuppardo's Renovations LLC";
 
 async function getSettingArray(key: string, fallback: string[]) {
   const setting = await prisma.setting.findUnique({ where: { key } });
@@ -187,10 +187,8 @@ export const quoteService = {
     const systemName = payload.systemName || product?.name || payload.areas[0]?.name || "Roof System";
 
     const defaultScope = await getSettingArray("defaultScopeBullets", []);
-    const defaultDisclaimer = await getSettingString(
-      "defaultDisclaimer",
-      "This estimate is provided in good faith."
-    );
+    const defaultDisclaimer = await getSettingString("defaultDisclaimer", "This estimate is provided in good faith.");
+    const workmanshipWarranty = await getSettingString("workmanshipWarranty", DEFAULT_WORKMANSHIP_WARRANTY);
 
     const templateCtx = {
       TOTAL_SQUARES: calcs.totalSquares.toString(),
@@ -216,7 +214,7 @@ export const quoteService = {
     const components = sanitizeList(payload.componentsOverride?.length ? payload.componentsOverride : productComponents);
 
     const warranties = [
-      WORKMANSHIP_WARRANTY,
+      workmanshipWarranty,
       payload.warrantyOverride || product?.warrantyText || "Manufacturer warranty as specified.",
     ];
 

@@ -19,16 +19,19 @@ router.get("/defaults", async (_req, res) => {
   const scopeSetting = await prisma.setting.findUnique({ where: { key: "defaultScopeBullets" } });
   const disclaimerSetting = await prisma.setting.findUnique({ where: { key: "defaultDisclaimer" } });
   const brandingSetting = await prisma.setting.findUnique({ where: { key: "branding" } });
+  const workmanshipSetting = await prisma.setting.findUnique({ where: { key: "workmanshipWarranty" } });
   res.json({
     company: brandingSetting?.value || config.company,
     scopeBullets: (scopeSetting?.value as string[]) || [],
     disclaimer: (disclaimerSetting?.value as string) || "",
+    workmanshipWarranty: (workmanshipSetting?.value as string) || "",
   });
 });
 
 const defaultsSchema = z.object({
   scopeBullets: z.array(z.string()).optional(),
   disclaimer: z.string().optional(),
+  workmanshipWarranty: z.string().optional(),
 });
 
 router.put("/defaults", async (req, res, next) => {
@@ -46,6 +49,13 @@ router.put("/defaults", async (req, res, next) => {
         where: { key: "defaultDisclaimer" },
         update: { value: payload.disclaimer },
         create: { key: "defaultDisclaimer", value: payload.disclaimer },
+      });
+    }
+    if (payload.workmanshipWarranty) {
+      await prisma.setting.upsert({
+        where: { key: "workmanshipWarranty" },
+        update: { value: payload.workmanshipWarranty },
+        create: { key: "workmanshipWarranty", value: payload.workmanshipWarranty },
       });
     }
     res.json({ status: "ok" });
