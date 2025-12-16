@@ -13,7 +13,7 @@
     --bg: #f6f6f6;
   }
   * { box-sizing: border-box; }
-  body, #app { margin: 0; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', Arial, sans-serif; color: var(--ink); background: var(--bg); font-size: 14px; line-height: 1.5; }
+  body, #app { margin: 0; font-family: Helvetica, Arial, sans-serif; color: var(--ink); background: var(--bg); font-size: 14px; line-height: 1.5; }
   .wrap { max-width: 1200px; margin: 0 auto; padding: 8px; }
   @media (min-width: 768px) { .wrap { padding: 16px; } }
   .toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; padding: 8px 12px; background: #fff; border-bottom: 2px solid var(--brand); position: sticky; top: 0; z-index: 100; gap: 8px; }
@@ -1269,7 +1269,7 @@
       scopeBullets: scope,
       isCustom: true,
       isApproved: false,
-      ownerEmail: state.rep.email || undefined,
+      ownerEmail: (state.rep.email && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(state.rep.email)) ? state.rep.email : undefined,
       createdBy: state.rep.name || undefined
     };
     setCustomStatus('Saving custom product...');

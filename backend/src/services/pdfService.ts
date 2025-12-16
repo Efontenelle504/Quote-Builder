@@ -74,6 +74,11 @@ export async function createQuotePdf(payload: QuotePdfPayload): Promise<PdfResul
     stream.on("error", reject);
     doc.on("error", reject);
 
+    const safeNumber = (value: unknown, fallback = 0) => {
+      const num = Number(value);
+      return Number.isFinite(num) ? num : fallback;
+    };
+
     // Header
     doc
       .fontSize(18)
@@ -120,28 +125,34 @@ export async function createQuotePdf(payload: QuotePdfPayload): Promise<PdfResul
 
     doc.moveDown();
     doc.fontSize(12).text("Areas & Pricing", { underline: true });
-    const tableTop = doc.y;
+    const tableTop = safeNumber(doc.y);
     const colWidths = { name: 260, sq: 100, price: 140 };
+    const left = safeNumber(doc.page.margins.left, 40);
+    const right = safeNumber(doc.page.width - doc.page.margins.right, 550);
+    const xName = left;
+    const xSq = left + colWidths.name;
+    const xTotal = left + colWidths.name + colWidths.sq;
 
     doc
       .fontSize(10)
       .fillColor("#666")
-      .text("Area", doc.x, tableTop, { width: colWidths.name })
-      .text("Squares", doc.x + colWidths.name, tableTop, { width: colWidths.sq, align: "right" })
-      .text("Total", doc.x + colWidths.name + colWidths.sq, tableTop, { width: colWidths.price, align: "right" });
+      .text("Area", xName, tableTop, { width: colWidths.name })
+      .text("Squares", xSq, tableTop, { width: colWidths.sq, align: "right" })
+      .text("Total", xTotal, tableTop, { width: colWidths.price, align: "right" });
 
     doc.moveDown(0.3);
-    doc.strokeColor("#ddd").moveTo(40, doc.y).lineTo(550, doc.y).stroke();
+    doc.strokeColor("#ddd").moveTo(left, safeNumber(doc.y)).lineTo(right, safeNumber(doc.y)).stroke();
 
     payload.areas.forEach((area) => {
+      const rowTop = safeNumber(doc.y);
       doc
         .fillColor("#000")
-        .text(area.name, { width: colWidths.name })
-        .text(String(area.squares), doc.x + colWidths.name, doc.y - 12, {
+        .text(area.name, xName, rowTop, { width: colWidths.name })
+        .text(String(area.squares), xSq, rowTop, {
           width: colWidths.sq,
           align: "right",
         })
-        .text(usd(area.lineTotal), doc.x + colWidths.name + colWidths.sq, doc.y - 12, {
+        .text(usd(area.lineTotal), xTotal, rowTop, {
           width: colWidths.price,
           align: "right",
         });
@@ -204,7 +215,11 @@ export async function createQuotePdf(payload: QuotePdfPayload): Promise<PdfResul
     if (payload.pricingLines.length) {
       doc.moveDown();
       doc.fontSize(12).text("Pricing Summary", { underline: true });
-      doc.fontSize(10).list(payload.pricingLines);
+      doc.moveDown(0.2);
+      doc.fontSize(10).fillColor("#000");
+      payload.pricingLines.forEach((line) => {
+        doc.text(`• ${line}`, { width: 520 });
+      });
     }
 
     if (payload.altPlyText) {

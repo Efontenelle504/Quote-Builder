@@ -5,7 +5,7 @@
   const style = document.createElement("style");
   style.textContent = `
     .app-nav {
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      font-family: Helvetica, Arial, sans-serif;
       background: #111827;
       color: #f9fafb;
       padding: 6px 12px;
@@ -52,6 +52,12 @@
       .app-nav {
         flex-direction: column;
         align-items: flex-start;
+      }
+    }
+    /* Hide nav bar on print/PDF */
+    @media print {
+      .app-nav {
+        display: none !important;
       }
     }
   `;
